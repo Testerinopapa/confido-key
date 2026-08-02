@@ -10,11 +10,11 @@ export const Route = createFileRoute("/")({
         content:
           "A hosted proxy that keeps your Claude and Gemini API keys server-side, so extension users never paste keys manually.",
       },
-      { property: "og:title", content: "Key Vault Pro — Hosted AI Keys" },
+      { property: "og:title", content: "Key Vault Pro — Hosted AI Keys for Your LinkedIn Extension" },
       {
         property: "og:description",
         content:
-          "Server-side Claude and Gemini proxy endpoints for browser extensions. No keys in the client.",
+          "A hosted proxy that keeps your Claude and Gemini API keys server-side, so extension users never paste keys manually.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

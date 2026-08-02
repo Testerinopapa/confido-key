@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Key Vault Pro — Hosted AI Keys for Your LinkedIn Extension" },
+      { name: "description", content: "A hosted proxy that keeps your Claude and Gemini API keys server-side, so extension users never paste keys manually." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Key Vault Pro — Hosted AI Keys for Your LinkedIn Extension" },
+      { property: "og:description", content: "A hosted proxy that keeps your Claude and Gemini API keys server-side, so extension users never paste keys manually." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Key Vault Pro — Hosted AI Keys for Your LinkedIn Extension" },
+      { name: "twitter:description", content: "A hosted proxy that keeps your Claude and Gemini API keys server-side, so extension users never paste keys manually." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f763a4f-3371-433a-a276-7bd77d2d3d31/id-preview-91db4da6--d8cd0c59-f14b-4bdb-bea4-b29c1c993d95.lovable.app-1785699239622.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f763a4f-3371-433a-a276-7bd77d2d3d31/id-preview-91db4da6--d8cd0c59-f14b-4bdb-bea4-b29c1c993d95.lovable.app-1785699239622.png" },
     ],
     links: [
       {
