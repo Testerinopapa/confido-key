@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
+import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicClaudeRoute = ApiPublicClaudeRouteImport.update({
+  id: '/api/public/claude',
+  path: '/api/public/claude',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGeminiRoute = ApiPublicGeminiRouteImport.update({
+  id: '/api/public/gemini',
+  path: '/api/public/gemini',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/claude': typeof ApiPublicClaudeRoute
+  '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/claude': typeof ApiPublicClaudeRoute
+  '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/claude': typeof ApiPublicClaudeRoute
+  '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/claude' | '/api/public/gemini'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/claude' | '/api/public/gemini'
+  id: '__root__' | '/' | '/api/public/claude' | '/api/public/gemini'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicClaudeRoute: typeof ApiPublicClaudeRoute
+  ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/claude': {
+      id: '/api/public/claude'
+      path: '/api/public/claude'
+      fullPath: '/api/public/claude'
+      preLoaderRoute: typeof ApiPublicClaudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/gemini': {
+      id: '/api/public/gemini'
+      path: '/api/public/gemini'
+      fullPath: '/api/public/gemini'
+      preLoaderRoute: typeof ApiPublicGeminiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicClaudeRoute: ApiPublicClaudeRoute,
+  ApiPublicGeminiRoute: ApiPublicGeminiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
