@@ -43,12 +43,12 @@ const endpoints = [
     method: "POST",
     path: "/api/public/gemini",
     provider: "Google Generative Language API",
-    note: 'Send "model" and optional "action" alongside the payload. Defaults: gemini-2.5-flash / generateContent.',
+    note: 'Send "model" and optional "action" alongside the payload. Defaults: gemini-3.1-flash-image-preview / generateContent.',
     sample: `await fetch("https://YOUR-APP.lovable.app/api/public/gemini", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.1-flash-image-preview",
     action: "generateContent",
     contents: [{ parts: [{ text: "Draft a LinkedIn reply" }] }],
   }),
