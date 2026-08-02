@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/public/gemini")({
         }
 
         const { model, action, ...payload } = body as Record<string, unknown>;
-        const modelName = typeof model === "string" ? model : "gemini-2.5-flash";
+        const modelName = typeof model === "string" ? model : "gemini-3.1-flash-image-preview";
         const actionName = typeof action === "string" ? action : "generateContent";
 
         if (!MODEL_PATTERN.test(modelName)) {
