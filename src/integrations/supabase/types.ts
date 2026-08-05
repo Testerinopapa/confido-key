@@ -44,6 +44,112 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          id: string
+          device_id: string
+          name: string
+          headline: string | null
+          profile_url: string | null
+          status: string
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          device_id: string
+          name: string
+          headline?: string | null
+          profile_url?: string | null
+          status?: string
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          device_id?: string
+          name?: string
+          headline?: string | null
+          profile_url?: string | null
+          status?: string
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          id: string
+          device_id: string
+          lead_id: string
+          direction: string
+          content: string
+          ai_generated: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          device_id: string
+          lead_id: string
+          direction: string
+          content: string
+          ai_generated?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          device_id?: string
+          lead_id?: string
+          direction?: string
+          content?: string
+          ai_generated?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_lead_id_fkey"
+            columns: ["lead_id"]
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      daily_activity: {
+        Row: {
+          id: string
+          device_id: string
+          date: string
+          connections_sent: number
+          comments_made: number
+          posts_created: number
+          messages_sent: number
+          messages_received: number
+        }
+        Insert: {
+          id?: string
+          device_id: string
+          date: string
+          connections_sent?: number
+          comments_made?: number
+          posts_created?: number
+          messages_sent?: number
+          messages_received?: number
+        }
+        Update: {
+          id?: string
+          device_id?: string
+          date?: string
+          connections_sent?: number
+          comments_made?: number
+          posts_created?: number
+          messages_sent?: number
+          messages_received?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
