@@ -49,10 +49,7 @@ export const Route = createFileRoute("/api/public/claude")({
 
         // Pass the upstream body straight through (works for JSON and SSE streams).
         const headers = new Headers(CORS_HEADERS);
-        headers.set(
-          "Content-Type",
-          upstream.headers.get("Content-Type") ?? "application/json",
-        );
+        headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "application/json");
         if (!upstream.ok) {
           const text = await upstream.text();
           console.error(`Anthropic request failed [${upstream.status}]: ${text}`);
