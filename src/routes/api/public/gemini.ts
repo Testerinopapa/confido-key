@@ -76,10 +76,7 @@ export const Route = createFileRoute("/api/public/gemini")({
         );
 
         const headers = new Headers(CORS_HEADERS);
-        headers.set(
-          "Content-Type",
-          upstream.headers.get("Content-Type") ?? "application/json",
-        );
+        headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "application/json");
         if (!upstream.ok) {
           const text = await upstream.text();
           console.error(`Gemini request failed [${upstream.status}]: ${text}`);
