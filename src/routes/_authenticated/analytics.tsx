@@ -114,17 +114,46 @@ function formatDateLabel(date: string) {
 }
 
 function changeLabel(current: number, previous: number, hasPrevious: boolean) {
-  if (!hasPrevious)
-    return { tone: "neutral", text: "No previous-period data", value: null as number | null };
-  if (current === 0 && previous === 0)
-    return { tone: "neutral", text: "No change vs previous period", value: 0 };
-  if (previous === 0) return { tone: "positive", text: "+100% vs previous period", value: 100 };
-  const value = Math.round(((current - previous) / previous) * 100);
+  if (!hasPrevious) {
+    return { tone: "neutral", percent: null as number | null, text: "No comparison data" };
+  }
+  if (current === 0 && previous === 0) {
+    return { tone: "neutral", percent: 0, text: "0% vs previous period" };
+  }
+  if (previous === 0) return { tone: "positive", percent: 100, text: "100% vs previous period" };
+  const percent = Math.round(((current - previous) / previous) * 100);
   return {
-    tone: value > 0 ? "positive" : value < 0 ? "negative" : "neutral",
-    text: `${value > 0 ? "+" : ""}${value}% vs previous period`,
-    value,
+    tone: percent > 0 ? "positive" : percent < 0 ? "negative" : "neutral",
+    percent,
+    text: `${Math.abs(percent)}% vs previous period`,
   };
+}
+
+function buildSparklinePoints(values: number[]) {
+  const validValues = values.filter((value) => Number.isFinite(value));
+  if (validValues.length < 2) return "";
+
+  const width = 72;
+  const height = 28;
+  const chartPadding = 3;
+  const min = Math.min(...validValues);
+  const max = Math.max(...validValues);
+  const padding = Math.max((max - min) * 0.15, 0.5);
+  const domainMin = Math.max(0, min - padding);
+  const domainMax = max + padding;
+  const domainRange = domainMax - domainMin || 1;
+  const innerWidth = width - chartPadding * 2;
+  const innerHeight = height - chartPadding * 2;
+
+  return values
+    .map((value, index) => {
+      const x =
+        values.length === 1 ? width / 2 : chartPadding + (index / (values.length - 1)) * innerWidth;
+      const normalized = (value - domainMin) / domainRange;
+      const y = height - chartPadding - normalized * innerHeight;
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(" ");
 }
 
 function MetricCard({
@@ -143,16 +172,8 @@ function MetricCard({
   const trend = changeLabel(value, previous, hasPrevious);
   const Icon =
     trend.tone === "negative" ? ArrowDown : trend.tone === "positive" ? ArrowUp : ArrowRight;
-  const max = Math.max(...sparkline, 1);
-  const points =
-    sparkline.length > 1
-      ? sparkline
-          .map(
-            (point, index) =>
-              `${(index / (sparkline.length - 1)) * 92 + 4},${34 - (point / max) * 26}`,
-          )
-          .join(" ")
-      : "";
+  const validPointCount = sparkline.filter((point) => Number.isFinite(point)).length;
+  const points = buildSparklinePoints(sparkline);
 
   return (
     <article className="analytics-card metric-card">
@@ -163,22 +184,37 @@ function MetricCard({
         <span className="metric-label">{metric.label}</span>
       </div>
       <div className="metric-value">{value.toLocaleString()}</div>
-      <div className={`metric-trend ${trend.tone}`} aria-label={trend.text}>
-        <Icon className="h-3.5 w-3.5" />
-        <span>{trend.text}</span>
+      <div className="metric-footer">
+        <div className={`metric-trend ${trend.tone}`} aria-label={trend.text}>
+          <Icon className="h-3.5 w-3.5 shrink-0" />
+          {trend.percent === null ? (
+            <span>{trend.text}</span>
+          ) : (
+            <span>
+              <b>{Math.abs(trend.percent)}%</b> <em>vs previous period</em>
+            </span>
+          )}
+        </div>
+        <div className="metric-sparkline-box" aria-hidden="true">
+          {validPointCount > 1 && points ? (
+            <svg className="metric-sparkline" viewBox="0 0 72 28" preserveAspectRatio="none">
+              <polyline
+                points={points}
+                fill="none"
+                stroke={metric.color}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          ) : validPointCount === 1 ? (
+            <span className="metric-sparkline-dot" style={{ backgroundColor: metric.color }} />
+          ) : (
+            <span className="metric-sparkline-empty" />
+          )}
+        </div>
       </div>
-      {sparkline.length >= 3 ? (
-        <svg className="metric-sparkline" viewBox="0 0 100 38" aria-hidden="true">
-          <polyline
-            points={points}
-            fill="none"
-            stroke={metric.color}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : null}
     </article>
   );
 }
