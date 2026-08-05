@@ -729,10 +729,13 @@
     gap: 16px;
   }
   .metric-card {
-    position: relative;
-    min-height: 146px;
+    display: flex;
+    min-height: 176px;
+    height: 100%;
+    min-width: 0;
+    flex-direction: column;
     overflow: hidden;
-    padding: 20px;
+    padding: 20px 24px;
   }
   .metric-card-top {
     display: flex;
@@ -750,6 +753,7 @@
     color: #2563eb;
   }
   .metric-label {
+    min-width: 0;
     font-size: 13px;
     font-weight: 800;
     color: #334155;
@@ -761,13 +765,39 @@
     letter-spacing: -0.06em;
     color: #020617;
   }
+  .metric-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 72px;
+    align-items: end;
+    gap: 12px;
+    margin-top: auto;
+    min-width: 0;
+  }
   .metric-trend {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 5px;
-    margin-top: 6px;
+    overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
     font-size: 12px;
     font-weight: 800;
+  }
+  .metric-trend span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+  }
+  .metric-trend b,
+  .metric-trend em {
+    font: inherit;
+    text-decoration: none;
+  }
+  .metric-trend em {
+    color: #64748b;
+    font-style: normal;
   }
   .metric-trend.positive {
     color: #059669;
@@ -778,12 +808,29 @@
   .metric-trend.neutral {
     color: #64748b;
   }
+  .metric-sparkline-box {
+    display: grid;
+    width: 72px;
+    height: 28px;
+    flex-shrink: 0;
+    place-items: center;
+    overflow: hidden;
+  }
   .metric-sparkline {
-    position: absolute;
-    right: 14px;
-    bottom: 18px;
-    width: 92px;
-    height: 38px;
+    display: block;
+    width: 72px;
+    height: 28px;
+  }
+  .metric-sparkline-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+  }
+  .metric-sparkline-empty {
+    width: 16px;
+    height: 2px;
+    border-radius: 999px;
+    background: #cbd5e1;
   }
   .overview-grid {
     display: grid;
@@ -1081,6 +1128,9 @@
   }
   .kpi-grid {
     grid-template-columns: 1fr;
+  }
+  .metric-footer {
+    grid-template-columns: minmax(0, 1fr) 72px;
   }
   .funnel,
   .campaign-stats {
