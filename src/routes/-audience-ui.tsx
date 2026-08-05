@@ -14,6 +14,7 @@ import {
   Send,
   ShieldCheck,
   Sparkles,
+  Terminal,
   Upload,
   Zap,
 } from "lucide-react";
@@ -210,28 +211,101 @@ export function LandingPage() {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[
-            "Automation Modes",
-            "Auto-Comment",
-            "Auto-Post",
-            "Auto-Reply (DM)",
-            "AI-Powered Pipeline",
-            "Gemini for Images",
-            "Three-Tier Fallback",
-            "Secure Server-Side",
-          ].map((title, i) => (
+            ["Auto-Connect", "Send personalized connection requests with AI-generated notes on People You May Know and search results."],
+            ["Auto-Comment", "Find posts by keyword and comment with AI-generated replies that match the author's tone and topic."],
+            ["Auto-Post", "Create feed posts with AI text (Claude) and images (Gemini), pasted into LinkedIn's editor via secure CDP."],
+            ["Auto-Reply (DM)", "Monitor your inbox and auto-reply to unread conversations with context-aware AI responses."],
+            ["Lead Pipeline", "Track every connection through 6 stages: New → Connected → Messaged → Replied → Follow-up Due → Archived."],
+            ["Activity Tracking", "Daily and 7-day rolling stats for connections, comments, posts, and messages sent/received."],
+            ["Daily Scheduling", "Schedule each mode to run automatically at a set hour — midnight reset keeps counts clean."],
+            ["Secure API Proxy", "Claude and Gemini keys stay server-side. Authenticated via X-Api-Key — never exposed to the browser."],
+          ].map(([title, desc]) => (
             <div className="feature" key={title}>
               <span className="icon">
                 <ShieldCheck className="h-4 w-4" />
               </span>
               <b>{title}</b>
-              <p>
-                {i < 4
-                  ? "Engage with relevant posts using AI-powered contextual prompts."
-                  : "Smart templates, secure execution, and encrypted vault storage."}
-              </p>
+              <p>{desc}</p>
             </div>
           ))}
         </div>
+
+        <section className="mx-auto mt-20 max-w-3xl space-y-6">
+          <h2 className="text-sm font-semibold tracking-wider text-slate-500 uppercase">
+            API Endpoints
+          </h2>
+          {[
+            {
+              method: "POST",
+              path: "/api/public/claude",
+              provider: "Anthropic Messages API",
+              note: "Body forwarded verbatim to /v1/messages. SSE streaming passes through. Requires X-Api-Key header.",
+              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/claude", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "X-Api-Key": "..." },
+  body: JSON.stringify({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 200,
+    messages: [{ role: "user", content: "Draft a LinkedIn reply" }],
+  }),
+});`,
+            },
+            {
+              method: "POST",
+              path: "/api/public/gemini",
+              provider: "Google Generative Language API",
+              note: "Pass model, action, and payload. Supports generateContent, streamGenerateContent, countTokens, embedContent. Requires X-Api-Key header.",
+              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/gemini", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "X-Api-Key": "..." },
+  body: JSON.stringify({
+    model: "gemini-3.1-flash-image-preview",
+    action: "generateContent",
+    generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+    contents: [{ parts: [{ text: "Professional LinkedIn post image" }] }],
+  }),
+});`,
+            },
+            {
+              method: "GET",
+              path: "/api/public/health",
+              provider: "Status check",
+              note: "Returns configured providers, version, and whether auth is required. No API key needed.",
+              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/health")
+  .then(r => r.json())
+  .then(console.log);
+// { status: "ok", version: "1.0.0", providers: { claude: true, gemini: true }, authRequired: true }`,
+            },
+          ].map((ep) => (
+            <article
+              key={ep.path}
+              className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+              style={{ boxShadow: "var(--shadow-panel)" }}
+            >
+              <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
+                <span className="rounded-md bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700">
+                  {ep.method}
+                </span>
+                <code className="text-sm font-semibold text-slate-800">{ep.path}</code>
+                <span className="text-xs text-slate-400">{ep.provider}</span>
+              </div>
+              <p className="px-5 pt-4 text-sm text-slate-500">{ep.note}</p>
+              <pre className="mt-4 overflow-x-auto border-t border-slate-100 bg-slate-50 px-5 py-4 text-xs leading-relaxed text-slate-700">
+                <code>{ep.sample}</code>
+              </pre>
+            </article>
+          ))}
+        </section>
+
+        <section className="mx-auto mt-16 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 p-5">
+          <h2 className="text-sm font-semibold text-amber-800">Secured by API key</h2>
+          <p className="mt-2 text-sm leading-relaxed text-amber-700">
+            These endpoints require an <code className="rounded bg-amber-200 px-1 text-xs font-semibold">X-Api-Key</code> header
+            when <code className="rounded bg-amber-200 px-1 text-xs font-semibold">API_KEYS</code> is set on the server.
+            Add your key in the extension settings under "Proxy API Key" to authenticate.
+            Without a valid key, the endpoints return 401.
+          </p>
+        </section>
       </section>
     </main>
   );
