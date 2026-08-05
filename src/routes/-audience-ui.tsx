@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import {
+  AlertCircle,
+  BarChart3,
+  Bell,
   CheckCircle2,
   ChevronDown,
   Download,
@@ -12,6 +15,7 @@ import {
   MoreHorizontal,
   Search,
   Send,
+  Settings,
   ShieldCheck,
   Sparkles,
   Terminal,
@@ -23,7 +27,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-
 const metrics = [
   ["Connection Sent", "1,982", "+14.8%"],
   ["Comments Made", "842", "+15.2%"],
@@ -33,13 +36,13 @@ const metrics = [
 ];
 
 const nav = [
-  ["Overview", "/dashboard"],
-  ["Activity", "/analytics"],
-  ["Analytics", "/analytics"],
-  ["Campaigns", "/pipeline"],
-  ["Reports", "/analytics"],
-  ["Alerts", "/dashboard"],
-  ["Settings", "/settings"],
+  ["Overview", "/dashboard", LayoutDashboard],
+  ["Activity", "/analytics", CheckCircle2],
+  ["Analytics", "/analytics", BarChart3],
+  ["Campaigns", "/pipeline", Send],
+  ["Reports", "/analytics", FileText],
+  ["Alerts", "/dashboard", Bell],
+  ["Settings", "/settings", Settings],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
 const names = [
@@ -211,14 +214,38 @@ export function LandingPage() {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Auto-Connect", "Send personalized connection requests with AI-generated notes on People You May Know and search results."],
-            ["Auto-Comment", "Find posts by keyword and comment with AI-generated replies that match the author's tone and topic."],
-            ["Auto-Post", "Create feed posts with AI text (Claude) and images (Gemini), pasted into LinkedIn's editor via secure CDP."],
-            ["Auto-Reply (DM)", "Monitor your inbox and auto-reply to unread conversations with context-aware AI responses."],
-            ["Lead Pipeline", "Track every connection through 6 stages: New → Connected → Messaged → Replied → Follow-up Due → Archived."],
-            ["Activity Tracking", "Daily and 7-day rolling stats for connections, comments, posts, and messages sent/received."],
-            ["Daily Scheduling", "Schedule each mode to run automatically at a set hour — midnight reset keeps counts clean."],
-            ["Secure API Proxy", "Claude and Gemini keys stay server-side. Authenticated via X-Api-Key — never exposed to the browser."],
+            [
+              "Auto-Connect",
+              "Send personalized connection requests with AI-generated notes on People You May Know and search results.",
+            ],
+            [
+              "Auto-Comment",
+              "Find posts by keyword and comment with AI-generated replies that match the author's tone and topic.",
+            ],
+            [
+              "Auto-Post",
+              "Create feed posts with AI text (Claude) and images (Gemini), pasted into LinkedIn's editor via secure CDP.",
+            ],
+            [
+              "Auto-Reply (DM)",
+              "Monitor your inbox and auto-reply to unread conversations with context-aware AI responses.",
+            ],
+            [
+              "Lead Pipeline",
+              "Track every connection through 6 stages: New → Connected → Messaged → Replied → Follow-up Due → Archived.",
+            ],
+            [
+              "Activity Tracking",
+              "Daily and 7-day rolling stats for connections, comments, posts, and messages sent/received.",
+            ],
+            [
+              "Daily Scheduling",
+              "Schedule each mode to run automatically at a set hour — midnight reset keeps counts clean.",
+            ],
+            [
+              "Secure API Proxy",
+              "Claude and Gemini keys stay server-side. Authenticated via X-Api-Key — never exposed to the browser.",
+            ],
           ].map(([title, desc]) => (
             <div className="feature" key={title}>
               <span className="icon">
@@ -300,10 +327,12 @@ export function LandingPage() {
         <section className="mx-auto mt-16 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 p-5">
           <h2 className="text-sm font-semibold text-amber-800">Secured by API key</h2>
           <p className="mt-2 text-sm leading-relaxed text-amber-700">
-            These endpoints require an <code className="rounded bg-amber-200 px-1 text-xs font-semibold">X-Api-Key</code> header
-            when <code className="rounded bg-amber-200 px-1 text-xs font-semibold">API_KEYS</code> is set on the server.
-            Add your key in the extension settings under "Proxy API Key" to authenticate.
-            Without a valid key, the endpoints return 401.
+            These endpoints require an{" "}
+            <code className="rounded bg-amber-200 px-1 text-xs font-semibold">X-Api-Key</code>{" "}
+            header when{" "}
+            <code className="rounded bg-amber-200 px-1 text-xs font-semibold">API_KEYS</code> is set
+            on the server. Add your key in the extension settings under "Proxy API Key" to
+            authenticate. Without a valid key, the endpoints return 401.
           </p>
         </section>
       </section>
@@ -314,9 +343,17 @@ export function LandingPage() {
 export function AppChrome({
   children,
   active = "Overview",
+  usageTotals,
 }: {
   children: ReactNode;
   active?: string;
+  usageTotals?: {
+    connections_sent: number;
+    comments_made: number;
+    posts_created: number;
+    messages_sent: number;
+    messages_received: number;
+  };
 }) {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
@@ -325,6 +362,17 @@ export function AppChrome({
   const avatar =
     profile?.avatar_url ??
     `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+  const planName = profile?.plan ?? "Free";
+  const planAllowance = planName.toLowerCase().includes("pro") ? 25000 : 5000;
+  const usedActions = usageTotals
+    ? usageTotals.connections_sent +
+      usageTotals.comments_made +
+      usageTotals.posts_created +
+      usageTotals.messages_sent +
+      usageTotals.messages_received
+    : 0;
+  const usagePercent = Math.min(100, Math.round((usedActions / planAllowance) * 100));
+  const unreadAlerts = 0;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -338,29 +386,45 @@ export function AppChrome({
       <section className="panel mx-auto min-h-[calc(100vh-48px)] max-w-[1500px] overflow-hidden">
         <div className="app">
           <aside>
-            <Logo />
-            {nav.map(([item, to]) => (
-              <Link to={to} className={`nav ${active === item ? "on" : ""}`} key={item}>
-                <LayoutDashboard className="h-4 w-4" />
-                {item}
-              </Link>
-            ))}
-            <div className="user">
-              <img alt={`${name} avatar`} src={avatar} />
-              <span>
-                {name}
-                <br />
-                <em>{profile?.plan ?? "Free"} Plan</em>
-              </span>
+            <div>
+              <Logo />
+              <nav className="sidebar-nav" aria-label="Main navigation">
+                {nav.map(([item, to, Icon]) => (
+                  <Link to={to} className={`nav ${active === item ? "on" : ""}`} key={item}>
+                    <Icon className="h-4 w-4" />
+                    <span>{item}</span>
+                    {item === "Alerts" && unreadAlerts > 0 ? <small>{unreadAlerts}</small> : null}
+                  </Link>
+                ))}
+              </nav>
             </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="mt-2 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
+            <div className="sidebar-bottom">
+              <div className="user-card">
+                <img alt={`${name} avatar`} src={avatar} />
+                <span>
+                  <b>{name}</b>
+                  <em>{planName} Plan</em>
+                  <button type="button" onClick={handleSignOut}>
+                    <LogOut className="h-3.5 w-3.5" /> Sign out
+                  </button>
+                </span>
+              </div>
+              <div className="plan-card">
+                <div>
+                  <b>Plan usage</b>
+                  <em>{planName} Plan</em>
+                </div>
+                <div className="usage-track">
+                  <span style={{ width: `${usagePercent}%` }} />
+                </div>
+                <p>
+                  {usedActions.toLocaleString()} / {planAllowance.toLocaleString()} actions
+                </p>
+                <button type="button">
+                  <AlertCircle className="h-3.5 w-3.5" /> Upgrade Plan
+                </button>
+              </div>
+            </div>
           </aside>
           <main>{children}</main>
         </div>
@@ -368,7 +432,6 @@ export function AppChrome({
     </main>
   );
 }
-
 
 export function DashboardPage() {
   return (
