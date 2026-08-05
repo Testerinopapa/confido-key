@@ -8,6 +8,10 @@ export function validateApiKey(request: Request): boolean {
   return keys.split(",").map(k => k.trim()).includes(provided);
 }
 
+export function getDeviceId(request: Request): string | null {
+  return request.headers.get("X-Device-Id");
+}
+
 export function authError() {
   return Response.json(
     { error: "Missing or invalid API key. Send X-Api-Key header." },
