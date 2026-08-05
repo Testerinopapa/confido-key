@@ -197,5 +197,3 @@ function LoginRoute() {
     </main>
   );
 }
-
-export { Button };
