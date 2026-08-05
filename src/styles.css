@@ -66,6 +66,13 @@
 }
 
 @layer components {
+  .page-shell {
+    min-height: 100vh;
+    overflow-x: auto;
+    background: #f4f8ff;
+    padding: 24px;
+    color: #0f172a;
+  }
   .showcase-grid {
     display: grid;
     grid-template-columns: repeat(11, minmax(0, 1fr));

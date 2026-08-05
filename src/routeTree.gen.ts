@@ -10,12 +10,42 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PipelineRouteImport } from './routes/pipeline'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PipelineRoute = PipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicClaudeRoute = ApiPublicClaudeRouteImport.update({
@@ -31,30 +61,75 @@ const ApiPublicGeminiRoute = ApiPublicGeminiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/pipeline': typeof PipelineRoute
+  '/settings': typeof SettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/pipeline': typeof PipelineRoute
+  '/settings': typeof SettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/pipeline': typeof PipelineRoute
+  '/settings': typeof SettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/claude' | '/api/public/gemini'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/login'
+    | '/pipeline'
+    | '/settings'
+    | '/api/public/claude'
+    | '/api/public/gemini'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/claude' | '/api/public/gemini'
-  id: '__root__' | '/' | '/api/public/claude' | '/api/public/gemini'
+  to:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/login'
+    | '/pipeline'
+    | '/settings'
+    | '/api/public/claude'
+    | '/api/public/gemini'
+  id:
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/login'
+    | '/pipeline'
+    | '/settings'
+    | '/api/public/claude'
+    | '/api/public/gemini'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
+  PipelineRoute: typeof PipelineRoute
+  SettingsRoute: typeof SettingsRoute
   ApiPublicClaudeRoute: typeof ApiPublicClaudeRoute
   ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
 }
@@ -66,6 +141,41 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pipeline': {
+      id: '/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof PipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/claude': {
@@ -87,6 +197,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
+  PipelineRoute: PipelineRoute,
+  SettingsRoute: SettingsRoute,
   ApiPublicClaudeRoute: ApiPublicClaudeRoute,
   ApiPublicGeminiRoute: ApiPublicGeminiRoute,
 }
