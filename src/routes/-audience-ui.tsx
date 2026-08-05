@@ -134,6 +134,7 @@ export function Chart({ compact = false }: { compact?: boolean }) {
 }
 
 export function LandingPage() {
+  const { user, loading } = useAuth();
   return (
     <main className="page-shell">
       <section className="panel hero-panel mx-auto max-w-7xl overflow-hidden p-10">
@@ -147,14 +148,23 @@ export function LandingPage() {
             <span>Changelog</span>
           </nav>
           <div className="flex gap-3">
-            <Link to="/login">
-              <Button variant="ghost">Log in</Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button>Get Started</Button>
-            </Link>
+            {loading ? null : user ? (
+              <Link to="/dashboard">
+                <Button>Go to dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost">Log in</Button>
+                </Link>
+                <Link to="/login">
+                  <Button>Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </header>
+
         <div className="relative grid gap-10 pt-12 lg:grid-cols-[1fr_1.08fr]">
           <div>
             <div className="pill">
