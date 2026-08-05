@@ -5,7 +5,6 @@ import {
   Download,
   FileText,
   Filter,
-  Globe2,
   Inbox,
   LayoutDashboard,
   LogOut,
