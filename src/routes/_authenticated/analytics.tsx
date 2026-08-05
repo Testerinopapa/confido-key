@@ -1,66 +1,620 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, MessageCircle, FileText, Inbox, CheckCircle2 } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Download,
+  FileText,
+  HelpCircle,
+  Inbox,
+  MessageCircle,
+  Send,
+  Target,
+  Users,
+} from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { AppChrome } from "../-audience-ui";
 
+type ActivityRow = Tables<"daily_activity">;
+type LeadRow = Tables<"leads">;
+type MessageRow = Tables<"messages"> & { leads?: Pick<LeadRow, "name" | "status"> | null };
+type DateRange = "7" | "14" | "30";
+type MetricKey =
+  "connections_sent" | "comments_made" | "posts_created" | "messages_sent" | "messages_received";
+
+type MetricDefinition = {
+  key: MetricKey;
+  label: string;
+  color: string;
+  bg: string;
+  icon: ReactNode;
+};
+
+const METRICS: MetricDefinition[] = [
+  {
+    key: "connections_sent",
+    label: "Connections Sent",
+    color: "#2563eb",
+    bg: "#eaf2ff",
+    icon: <Send className="h-5 w-5" />,
+  },
+  {
+    key: "comments_made",
+    label: "Comments Made",
+    color: "#8b5cf6",
+    bg: "#f1eaff",
+    icon: <MessageCircle className="h-5 w-5" />,
+  },
+  {
+    key: "posts_created",
+    label: "Posts Created",
+    color: "#16a34a",
+    bg: "#e9f9ef",
+    icon: <FileText className="h-5 w-5" />,
+  },
+  {
+    key: "messages_sent",
+    label: "Messages Sent",
+    color: "#f97316",
+    bg: "#fff1e6",
+    icon: <Inbox className="h-5 w-5" />,
+  },
+  {
+    key: "messages_received",
+    label: "Replies Received",
+    color: "#ec407a",
+    bg: "#ffe8f0",
+    icon: <CheckCircle2 className="h-5 w-5" />,
+  },
+];
+
+const metricLabels = Object.fromEntries(
+  METRICS.map((metric) => [metric.key, metric.label]),
+) as Record<MetricKey, string>;
+
+function sumRows(rows: ActivityRow[]) {
+  return rows.reduce(
+    (acc, row) => ({
+      connections_sent: acc.connections_sent + row.connections_sent,
+      comments_made: acc.comments_made + row.comments_made,
+      posts_created: acc.posts_created + row.posts_created,
+      messages_sent: acc.messages_sent + row.messages_sent,
+      messages_received: acc.messages_received + row.messages_received,
+    }),
+    {
+      connections_sent: 0,
+      comments_made: 0,
+      posts_created: 0,
+      messages_sent: 0,
+      messages_received: 0,
+    } satisfies Record<MetricKey, number>,
+  );
+}
+
+function formatDateLabel(date: string) {
+  return new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function changeLabel(current: number, previous: number, hasPrevious: boolean) {
+  if (!hasPrevious)
+    return { tone: "neutral", text: "No previous-period data", value: null as number | null };
+  if (current === 0 && previous === 0)
+    return { tone: "neutral", text: "No change vs previous period", value: 0 };
+  if (previous === 0) return { tone: "positive", text: "+100% vs previous period", value: 100 };
+  const value = Math.round(((current - previous) / previous) * 100);
+  return {
+    tone: value > 0 ? "positive" : value < 0 ? "negative" : "neutral",
+    text: `${value > 0 ? "+" : ""}${value}% vs previous period`,
+    value,
+  };
+}
+
+function MetricCard({
+  metric,
+  value,
+  previous,
+  hasPrevious,
+  sparkline,
+}: {
+  metric: MetricDefinition;
+  value: number;
+  previous: number;
+  hasPrevious: boolean;
+  sparkline: number[];
+}) {
+  const trend = changeLabel(value, previous, hasPrevious);
+  const Icon =
+    trend.tone === "negative" ? ArrowDown : trend.tone === "positive" ? ArrowUp : ArrowRight;
+  const max = Math.max(...sparkline, 1);
+  const points =
+    sparkline.length > 1
+      ? sparkline
+          .map(
+            (point, index) =>
+              `${(index / (sparkline.length - 1)) * 92 + 4},${34 - (point / max) * 26}`,
+          )
+          .join(" ")
+      : "";
+
+  return (
+    <article className="analytics-card metric-card">
+      <div className="metric-card-top">
+        <span className="metric-icon" style={{ backgroundColor: metric.bg, color: metric.color }}>
+          {metric.icon}
+        </span>
+        <span className="metric-label">{metric.label}</span>
+      </div>
+      <div className="metric-value">{value.toLocaleString()}</div>
+      <div className={`metric-trend ${trend.tone}`} aria-label={trend.text}>
+        <Icon className="h-3.5 w-3.5" />
+        <span>{trend.text}</span>
+      </div>
+      {sparkline.length >= 3 ? (
+        <svg className="metric-sparkline" viewBox="0 0 100 38" aria-hidden="true">
+          <polyline
+            points={points}
+            fill="none"
+            stroke={metric.color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : null}
+    </article>
+  );
+}
+
+function AnalyticsHeader({
+  range,
+  onRangeChange,
+  onExport,
+  canExport,
+}: {
+  range: DateRange;
+  onRangeChange: (range: DateRange) => void;
+  onExport: () => void;
+  canExport: boolean;
+}) {
+  return (
+    <header className="analytics-header">
+      <div>
+        <h2>Activity & Analytics</h2>
+        <p>Monitor automation activity, performance and outcomes in real time.</p>
+      </div>
+      <div className="analytics-actions">
+        <label className="range-select">
+          <CalendarDays className="h-4 w-4" />
+          <select
+            value={range}
+            onChange={(event) => onRangeChange(event.target.value as DateRange)}
+            aria-label="Date range"
+          >
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+          </select>
+          <ChevronDown className="h-4 w-4" />
+        </label>
+        <button
+          className="export-button"
+          type="button"
+          onClick={onExport}
+          disabled={!canExport}
+          title={
+            canExport
+              ? "Export currently loaded analytics as CSV"
+              : "No analytics data available to export"
+          }
+        >
+          <Download className="h-4 w-4" /> Export report
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function ActivityOverview({ rows }: { rows: ActivityRow[] }) {
+  const chartData = rows.map((row) => ({ ...row, date: formatDateLabel(row.date) }));
+  const hasHistory = chartData.length >= 2;
+  return (
+    <article className="analytics-card activity-overview">
+      <div className="card-title-row">
+        <h3>
+          Activity Overview{" "}
+          <HelpCircle
+            className="h-4 w-4 text-slate-400"
+            aria-label="Daily activity from synced automation records"
+          />
+        </h3>
+        <button
+          className="segmented-button"
+          type="button"
+          disabled
+          title="Daily grouping is based on the available daily activity table"
+        >
+          Daily <ChevronDown className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="chart-legend" aria-label="Chart legend">
+        {METRICS.map((metric) => (
+          <span key={metric.key}>
+            <i style={{ backgroundColor: metric.color }} />
+            {metric.label}
+          </span>
+        ))}
+      </div>
+      {hasHistory ? (
+        <div className="chart-wrap">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 5" vertical={false} stroke="#dbe5f2" />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "#64748b", fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: "#64748b", fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                formatter={(value, name) => [value, metricLabels[name as MetricKey] ?? name]}
+                contentStyle={{ borderRadius: 12, border: "1px solid #dbe5f2" }}
+              />
+              {METRICS.map((metric) => (
+                <Line
+                  key={metric.key}
+                  type="monotone"
+                  dataKey={metric.key}
+                  name={metric.key}
+                  stroke={metric.color}
+                  strokeWidth={2.5}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <div className="limited-state">
+          <FileText className="h-8 w-8" />
+          <b>Daily historical data is limited</b>
+          <p>
+            At least two synced activity days are needed to draw a trend line. Aggregate totals
+            above still use your real records.
+          </p>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function RecentActivity({ rows, messages }: { rows: ActivityRow[]; messages: MessageRow[] }) {
+  const activityItems = [
+    ...messages.slice(0, 4).map((message) => ({
+      id: message.id,
+      icon: message.direction === "inbound" ? <CheckCircle2 /> : <Inbox />,
+      title:
+        message.direction === "inbound"
+          ? `Reply received${message.leads?.name ? ` from ${message.leads.name}` : ""}`
+          : `Message sent${message.leads?.name ? ` to ${message.leads.name}` : ""}`,
+      subtitle: message.leads?.status ? `Lead status: ${message.leads.status}` : "LinkedIn message",
+      date: message.created_at,
+      tone: message.direction === "inbound" ? "pink" : "orange",
+    })),
+    ...rows
+      .flatMap((row) =>
+        METRICS.filter((metric) => row[metric.key] > 0).map((metric) => ({
+          id: `${row.id}-${metric.key}`,
+          icon: metric.icon,
+          title: `${metric.label}: ${row[metric.key].toLocaleString()}`,
+          subtitle: "Synced daily activity",
+          date: row.date,
+          tone: metric.key,
+        })),
+      )
+      .slice(0, 5),
+  ]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+  return (
+    <article className="analytics-card recent-activity">
+      <div className="card-title-row">
+        <h3>Recent Activity</h3>
+        <Link to="/analytics">View all</Link>
+      </div>
+      {activityItems.length ? (
+        activityItems.map((item) => (
+          <div className="activity-item" key={item.id}>
+            <span className={`activity-icon ${item.tone}`}>{item.icon}</span>
+            <span>
+              <b>{item.title}</b>
+              <em>{item.subtitle}</em>
+            </span>
+            <time>
+              {new Date(item.date).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+              })}
+            </time>
+          </div>
+        ))
+      ) : (
+        <div className="empty-state">
+          <Inbox className="h-8 w-8" />
+          <b>No recent activity yet</b>
+          <p>Start the extension to sync connections, comments, posts, messages and replies.</p>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function ConversionFunnel({
+  totals,
+  qualifiedLeads,
+}: {
+  totals: Record<MetricKey, number>;
+  qualifiedLeads: number | null;
+}) {
+  const replyPct =
+    totals.connections_sent > 0
+      ? Math.round((totals.messages_received / totals.connections_sent) * 100)
+      : 0;
+  return (
+    <article className="analytics-card bottom-card">
+      <h3>
+        Conversion Funnel <HelpCircle className="h-4 w-4 text-slate-400" />
+      </h3>
+      <div className="funnel">
+        <div>
+          <Users />
+          <b>{totals.connections_sent}</b>
+          <span>Connections</span>
+          <em>100%</em>
+        </div>
+        <ArrowRight />
+        <div>
+          <MessageCircle />
+          <b>{totals.messages_received}</b>
+          <span>Replies</span>
+          <em>{replyPct}%</em>
+        </div>
+        <ArrowRight />
+        <div>
+          <Target />
+          <b>{qualifiedLeads ?? "—"}</b>
+          <span>Qualified Leads</span>
+          <em>{qualifiedLeads === null ? "Unavailable" : `${replyPct}%`}</em>
+        </div>
+      </div>
+      <p>
+        Your conversion rate is <strong>{replyPct}%</strong>
+      </p>
+    </article>
+  );
+}
+
+function ResponseRateCard({ replies, messages }: { replies: number; messages: number }) {
+  const rate = messages > 0 ? Math.round((replies / messages) * 100) : 0;
+  return (
+    <article className="analytics-card bottom-card response-card">
+      <h3>
+        Response Rate <HelpCircle className="h-4 w-4 text-slate-400" />
+      </h3>
+      <strong>{rate}%</strong>
+      <p>
+        {replies === 0
+          ? "No replies received yet"
+          : `${replies.toLocaleString()} replies from ${messages.toLocaleString()} sent messages.`}
+      </p>
+      <div className="response-note">
+        Your campaigns have sent {messages.toLocaleString()} messages. Replies will appear here when
+        received.
+      </div>
+    </article>
+  );
+}
+
+function TopCampaignCard({
+  leads,
+  totals,
+}: {
+  leads: LeadRow[];
+  totals: Record<MetricKey, number>;
+}) {
+  const activeLeads = leads.filter((lead) => lead.status !== "archived");
+  const hasActivity = totals.connections_sent + totals.messages_sent + totals.messages_received > 0;
+  if (!hasActivity)
+    return (
+      <article className="analytics-card bottom-card">
+        <h3>Top Performing Campaign</h3>
+        <div className="empty-state">
+          <Target className="h-8 w-8" />
+          <b>No campaign activity yet</b>
+          <p>Campaign performance will appear after synced outreach activity exists.</p>
+        </div>
+      </article>
+    );
+  const replyRate =
+    totals.messages_sent > 0
+      ? Math.round((totals.messages_received / totals.messages_sent) * 100)
+      : 0;
+  return (
+    <article className="analytics-card bottom-card top-campaign">
+      <h3>
+        Top Performing Campaign <HelpCircle className="h-4 w-4 text-slate-400" />
+      </h3>
+      <div className="campaign-head">
+        <span className="metric-icon">
+          <Target className="h-5 w-5" />
+        </span>
+        <b>All tracked outreach</b>
+        <em>Active</em>
+      </div>
+      <div className="campaign-stats">
+        <span>
+          Connections<b>{totals.connections_sent}</b>
+        </span>
+        <span>
+          Messages<b>{totals.messages_sent}</b>
+        </span>
+        <span>
+          Replies<b>{totals.messages_received}</b>
+        </span>
+        <span>
+          Reply Rate<b>{replyRate}%</b>
+        </span>
+      </div>
+      <Link className="report-link" to="/pipeline">
+        View campaign report <ArrowRight className="h-4 w-4" />
+      </Link>
+      <p className="data-note">
+        Campaign-level analytics are limited; this card summarizes {activeLeads.length} active
+        tracked leads.
+      </p>
+    </article>
+  );
+}
+
 function Analytics() {
-  const { data: activity, isLoading } = useQuery({
-    queryKey: ["analytics"],
+  const [range, setRange] = useState<DateRange>("7");
+  const days = Number(range);
+  const {
+    data: activity = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["analytics", range],
     queryFn: async () => {
-      const { data } = await supabase.from("daily_activity").select("*").order("date", { ascending: false }).limit(14);
+      const { data, error } = await supabase
+        .from("daily_activity")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(days * 2);
+      if (error) throw error;
       return data ?? [];
     },
     refetchInterval: 30_000,
   });
-
-  const { data: leadCount } = useQuery({
-    queryKey: ["lead-count"],
+  const { data: leads = [] } = useQuery({
+    queryKey: ["analytics-leads"],
     queryFn: async () => {
-      const { count } = await supabase.from("leads").select("*", { count: "exact", head: true });
-      return count ?? 0;
+      const { data } = await supabase
+        .from("leads")
+        .select("*")
+        .order("updated_at", { ascending: false });
+      return data ?? [];
     },
   });
+  const { data: messages = [] } = useQuery({
+    queryKey: ["analytics-messages"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("*, leads(name, status)")
+        .order("created_at", { ascending: false })
+        .limit(12);
+      return (data ?? []) as MessageRow[];
+    },
+  });
+  const sorted = useMemo(
+    () => [...activity].sort((a, b) => a.date.localeCompare(b.date)),
+    [activity],
+  );
+  const currentRows = sorted.slice(-days);
+  const previousRows = sorted.slice(
+    Math.max(0, sorted.length - days * 2),
+    Math.max(0, sorted.length - days),
+  );
+  const totals = sumRows(currentRows);
+  const previousTotals = sumRows(previousRows);
+  const hasPrevious = previousRows.length > 0;
 
-  if (isLoading) return <AppChrome active="Analytics"><div className="p-8 text-slate-500">Loading...</div></AppChrome>;
+  function exportCsv() {
+    const headers = ["date", ...METRICS.map((metric) => metric.key)];
+    const csv = [
+      headers.join(","),
+      ...currentRows.map((row) => headers.map((key) => row[key as keyof ActivityRow]).join(",")),
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `audiencepilot-analytics-${range}-days.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
-  const totals = (activity ?? []).reduce((acc, r) => ({
-    connections_sent: acc.connections_sent + r.connections_sent,
-    comments_made: acc.comments_made + r.comments_made,
-    posts_created: acc.posts_created + r.posts_created,
-    messages_sent: acc.messages_sent + r.messages_sent,
-    messages_received: acc.messages_received + r.messages_received,
-  }), { connections_sent: 0, comments_made: 0, posts_created: 0, messages_sent: 0, messages_received: 0 });
+  if (isLoading)
+    return (
+      <AppChrome active="Analytics">
+        <div className="analytics-page">
+          <div className="p-8 text-slate-500">Loading analytics...</div>
+        </div>
+      </AppChrome>
+    );
+  if (isError)
+    return (
+      <AppChrome active="Analytics">
+        <div className="analytics-page">
+          <div className="empty-state">Unable to load analytics right now.</div>
+        </div>
+      </AppChrome>
+    );
 
   return (
-    <AppChrome active="Analytics">
-      <div className="topbar">
-        <div>
-          <h2>Activity & Analytics</h2>
-          <p>Monitor automation activity, performance and outcomes in real time.</p>
-        </div>
-      </div>
-      <div className="analytics-metrics">
-        <div className="metric"><Send className="h-5 w-5 text-blue-600" /><span>Connections Sent</span><b>{totals.connections_sent}</b><em>{leadCount} leads</em></div>
-        <div className="metric"><MessageCircle className="h-5 w-5 text-blue-600" /><span>Comments Made</span><b>{totals.comments_made}</b><em>Total</em></div>
-        <div className="metric"><FileText className="h-5 w-5 text-blue-600" /><span>Posts Created</span><b>{totals.posts_created}</b><em>Total</em></div>
-        <div className="metric"><Inbox className="h-5 w-5 text-blue-600" /><span>Messages Sent</span><b>{totals.messages_sent}</b><em>Total</em></div>
-        <div className="metric"><CheckCircle2 className="h-5 w-5 text-blue-600" /><span>Replies Received</span><b>{totals.messages_received}</b><em>Total</em></div>
-      </div>
-      <div className="table-card mt-6">
-        <b>7-Day Activity (Rolling)</b>
-        {(activity ?? []).slice(0, 7).map(row => (
-          <p key={row.date}>
-            <span>{row.date}</span>
-            <span>{row.connections_sent}</span>
-            <span>{row.comments_made}</span>
-            <span>{row.posts_created}</span>
-            <span>{row.messages_sent}</span>
-          </p>
-        ))}
-        {(activity ?? []).length === 0 && (
-          <p className="text-sm text-slate-400 mt-2">No activity recorded yet. Start the extension to begin tracking.</p>
-        )}
+    <AppChrome active="Analytics" usageTotals={totals}>
+      <div className="analytics-page">
+        <AnalyticsHeader
+          range={range}
+          onRangeChange={setRange}
+          onExport={exportCsv}
+          canExport={currentRows.length > 0}
+        />
+        <section className="kpi-grid">
+          {METRICS.map((metric) => (
+            <MetricCard
+              key={metric.key}
+              metric={metric}
+              value={totals[metric.key]}
+              previous={previousTotals[metric.key]}
+              hasPrevious={hasPrevious}
+              sparkline={currentRows.map((row) => row[metric.key])}
+            />
+          ))}
+        </section>
+        <section className="overview-grid">
+          <ActivityOverview rows={currentRows} />
+          <RecentActivity rows={currentRows} messages={messages} />
+        </section>
+        <section className="bottom-grid">
+          <ConversionFunnel totals={totals} qualifiedLeads={null} />
+          <ResponseRateCard replies={totals.messages_received} messages={totals.messages_sent} />
+          <TopCampaignCard leads={leads} totals={totals} />
+        </section>
       </div>
     </AppChrome>
   );
@@ -70,9 +624,15 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
     meta: [
       { title: "Activity & Analytics — AudiencePilot" },
-      { name: "description", content: "Monitor automation activity, performance and outcomes in real time." },
+      {
+        name: "description",
+        content: "Monitor automation activity, performance and outcomes in real time.",
+      },
       { property: "og:title", content: "Activity & Analytics — AudiencePilot" },
-      { property: "og:description", content: "Rolling activity, automation health and campaign performance." },
+      {
+        property: "og:description",
+        content: "Rolling activity, automation health and campaign performance.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
