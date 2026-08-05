@@ -5,11 +5,10 @@ import {
   Download,
   FileText,
   Filter,
-  Github,
   Globe2,
   Inbox,
   LayoutDashboard,
-  LockKeyhole,
+  LogOut,
   MessageCircle,
   MoreHorizontal,
   Search,
@@ -19,7 +18,11 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
 
 const metrics = [
   ["Connection Sent", "1,982", "+14.8%"],
