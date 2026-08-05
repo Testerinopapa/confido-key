@@ -225,50 +225,6 @@ export function LandingPage() {
   );
 }
 
-export function LoginPage() {
-  return (
-    <main className="page-shell grid place-items-center">
-      <section className="panel w-full max-w-md bg-[radial-gradient(#dce7ff_1px,transparent_1px)] [background-size:16px_16px] p-9">
-        <div className="auth-card mx-auto">
-          <Logo />
-          <h2>Welcome back 👋</h2>
-          <p>Sign in to continue to your dashboard</p>
-          <label>
-            Email address
-            <input placeholder="you@example.com" />
-          </label>
-          <label>
-            Password
-            <input type="password" value="••••••••••••" readOnly />
-          </label>
-          <div className="flex items-center justify-between text-xs">
-            <span>▣ Remember me</span>
-            <a>Forgot password?</a>
-          </div>
-          <Link to="/dashboard">
-            <Button>Sign in</Button>
-          </Link>
-          <div className="divider">or continue with</div>
-          <button className="oauth">
-            <Globe2 className="h-4 w-4" />
-            Continue with Google
-          </button>
-          <button className="oauth">
-            <Github className="h-4 w-4" />
-            Continue with Apple
-          </button>
-          <div className="secure">
-            <LockKeyhole className="h-5 w-5 text-blue-600" />
-            Your data is encrypted and secure.
-            <br />
-            We never store your LinkedIn password.
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
-
 export function AppChrome({
   children,
   active = "Overview",
@@ -276,6 +232,21 @@ export function AppChrome({
   children: ReactNode;
   active?: string;
 }) {
+  const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const name = profile?.display_name ?? user?.email ?? "Account";
+  const avatar =
+    profile?.avatar_url ??
+    `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  }
+
   return (
     <main className="page-shell">
       <section className="panel mx-auto min-h-[calc(100vh-48px)] max-w-[1500px] overflow-hidden">
@@ -289,16 +260,21 @@ export function AppChrome({
               </Link>
             ))}
             <div className="user">
-              <img
-                alt="Sarah Johnson avatar"
-                src="https://api.dicebear.com/9.x/avataaars/svg?seed=Sarah"
-              />
+              <img alt={`${name} avatar`} src={avatar} />
               <span>
-                Sarah Johnson
+                {name}
                 <br />
-                <em>Pro Plan</em>
+                <em>{profile?.plan ?? "Free"} Plan</em>
               </span>
             </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="mt-2 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
           </aside>
           <main>{children}</main>
         </div>
@@ -306,6 +282,7 @@ export function AppChrome({
     </main>
   );
 }
+
 
 export function DashboardPage() {
   return (
