@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useState } from "react";
 import {
   AlertCircle,
   BarChart3,
@@ -86,11 +87,16 @@ export function Logo() {
 export function Button({
   children,
   variant = "primary",
+  ...rest
 }: {
   children: ReactNode;
   variant?: "primary" | "ghost" | "soft";
-}) {
-  return <button className={`btn ${variant}`}>{children}</button>;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className">) {
+  return (
+    <button className={`btn ${variant}`} {...rest}>
+      {children}
+    </button>
+  );
 }
 
 export function Chart({ compact = false }: { compact?: boolean }) {
@@ -134,6 +140,83 @@ export function Chart({ compact = false }: { compact?: boolean }) {
         }),
       )}
     </svg>
+  );
+}
+
+const EXTENSION_FILE = "audiencepilot-extension.zip";
+
+const installSteps = [
+  "Download and unzip the extension package.",
+  "Open chrome://extensions in Chrome, Edge, Brave, or Arc.",
+  "Turn on Developer mode (top-right toggle).",
+  'Click "Load unpacked" and pick the unzipped folder.',
+  "Open the AudiencePilot popup and hit Test connection.",
+];
+
+export function ExtensionDownload() {
+  const [state, setState] = useState<"idle" | "busy" | "error">("idle");
+
+  function handleDownload() {
+    setState("busy");
+    fetch(`/${EXTENSION_FILE}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = EXTENSION_FILE;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setState("idle");
+      })
+      .catch(() => setState("error"));
+  }
+
+  return (
+    <section
+      id="download"
+      className="mx-auto mt-20 grid max-w-5xl gap-8 rounded-2xl border border-slate-200 bg-white p-8 lg:grid-cols-[1.1fr_1fr]"
+      style={{ boxShadow: "var(--shadow-panel)" }}
+    >
+      <div>
+        <div className="pill">
+          <Download className="h-3.5 w-3.5" /> Chrome Extension · v1.0.0
+        </div>
+        <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">
+          Download the extension
+        </h2>
+        <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
+          Works in Chrome, Edge, Brave, Arc and Opera. The Claude and Gemini keys stay on our
+          server — your team never pastes an API key anywhere.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Button onClick={handleDownload} disabled={state === "busy"}>
+            <span className="inline-flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              {state === "busy" ? "Preparing…" : "Download .zip"}
+            </span>
+          </Button>
+          <span className="text-xs font-medium text-slate-500">Manifest V3 · ~13 KB</span>
+        </div>
+        {state === "error" ? (
+          <p className="mt-3 text-xs font-semibold text-red-600">
+            Could not fetch the package. Please retry in a moment.
+          </p>
+        ) : null}
+      </div>
+      <ol className="space-y-3 rounded-xl bg-slate-50 p-6 text-sm text-slate-700">
+        {installSteps.map((step, index) => (
+          <li key={step} className="flex gap-3">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-600 text-xs font-bold text-white">
+              {index + 1}
+            </span>
+            <span className="leading-6">{step}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
@@ -256,6 +339,10 @@ export function LandingPage() {
             </div>
           ))}
         </div>
+
+        <ExtensionDownload />
+
+
 
         <section className="mx-auto mt-20 max-w-3xl space-y-6">
           <h2 className="text-sm font-semibold tracking-wider text-slate-500 uppercase">

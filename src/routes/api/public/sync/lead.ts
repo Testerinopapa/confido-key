@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/public/sync/lead")({
         // Upsert by device_id + name
         const { data: existing } = await supabaseAdmin
           .from("leads")
-          .select("id, status")
+          .select("id, status, headline, profile_url")
           .eq("device_id", deviceId)
           .eq("name", body.name)
           .maybeSingle();
