@@ -19,6 +19,10 @@ import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicSyncActivityRouteImport } from './routes/api/public/sync/activity'
+import { Route as ApiPublicSyncLeadRouteImport } from './routes/api/public/sync/lead'
+import { Route as ApiPublicSyncMessageRouteImport } from './routes/api/public/sync/message'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -69,6 +73,26 @@ const ApiPublicGeminiRoute = ApiPublicGeminiRouteImport.update({
   path: '/api/public/gemini',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSyncActivityRoute = ApiPublicSyncActivityRouteImport.update({
+  id: '/api/public/sync/activity',
+  path: '/api/public/sync/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSyncLeadRoute = ApiPublicSyncLeadRouteImport.update({
+  id: '/api/public/sync/lead',
+  path: '/api/public/sync/lead',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSyncMessageRoute = ApiPublicSyncMessageRouteImport.update({
+  id: '/api/public/sync/message',
+  path: '/api/public/sync/message',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,6 +104,10 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
+  '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +119,10 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
+  '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +136,10 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
+  '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +153,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
+    | '/api/public/health'
+    | '/api/public/sync/activity'
+    | '/api/public/sync/lead'
+    | '/api/public/sync/message'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +168,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
+    | '/api/public/health'
+    | '/api/public/sync/activity'
+    | '/api/public/sync/lead'
+    | '/api/public/sync/message'
   id:
     | '__root__'
     | '/'
@@ -140,6 +184,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
+    | '/api/public/health'
+    | '/api/public/sync/activity'
+    | '/api/public/sync/lead'
+    | '/api/public/sync/message'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,6 +197,10 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicClaudeRoute: typeof ApiPublicClaudeRoute
   ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicSyncActivityRoute: typeof ApiPublicSyncActivityRoute
+  ApiPublicSyncLeadRoute: typeof ApiPublicSyncLeadRoute
+  ApiPublicSyncMessageRoute: typeof ApiPublicSyncMessageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,6 +275,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGeminiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sync/activity': {
+      id: '/api/public/sync/activity'
+      path: '/api/public/sync/activity'
+      fullPath: '/api/public/sync/activity'
+      preLoaderRoute: typeof ApiPublicSyncActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sync/lead': {
+      id: '/api/public/sync/lead'
+      path: '/api/public/sync/lead'
+      fullPath: '/api/public/sync/lead'
+      preLoaderRoute: typeof ApiPublicSyncLeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sync/message': {
+      id: '/api/public/sync/message'
+      path: '/api/public/sync/message'
+      fullPath: '/api/public/sync/message'
+      preLoaderRoute: typeof ApiPublicSyncMessageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -250,7 +330,21 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicClaudeRoute: ApiPublicClaudeRoute,
   ApiPublicGeminiRoute: ApiPublicGeminiRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicSyncActivityRoute: ApiPublicSyncActivityRoute,
+  ApiPublicSyncLeadRoute: ApiPublicSyncLeadRoute,
+  ApiPublicSyncMessageRoute: ApiPublicSyncMessageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
