@@ -22,18 +22,32 @@ function Settings() {
   async function createKey() {
     if (!newName.trim()) return;
     setCreating(true);
-    const key = "sk-" + crypto.randomUUID().replace(/-/g, "").slice(0, 32);
-    const { error } = await supabase.from("api_keys").insert({ name: newName.trim(), key, user_id: (await supabase.auth.getUser()).data.user!.id });
-    if (!error) {
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) throw new Error("You need to be signed in.");
+      const key = "sk-" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+      const { error } = await supabase
+        .from("api_keys")
+        .insert({ name: newName.trim(), key, user_id: userData.user.id });
+      if (error) throw error;
       setNewName("");
-      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+      await queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+      toast.success("API key generated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not generate key");
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   }
 
   async function revokeKey(id: string) {
-    await supabase.from("api_keys").delete().eq("id", id);
+    const { error } = await supabase.from("api_keys").delete().eq("id", id);
+    if (error) {
+      toast.error("Could not revoke key");
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    toast.success("API key revoked");
   }
 
   function copyKey(key: string) {
