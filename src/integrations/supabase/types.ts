@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_activity: {
+        Row: {
+          comments_made: number
+          connections_sent: number
+          date: string
+          device_id: string
+          id: string
+          messages_received: number
+          messages_sent: number
+          posts_created: number
+        }
+        Insert: {
+          comments_made?: number
+          connections_sent?: number
+          date: string
+          device_id: string
+          id?: string
+          messages_received?: number
+          messages_sent?: number
+          posts_created?: number
+        }
+        Update: {
+          comments_made?: number
+          connections_sent?: number
+          date?: string
+          device_id?: string
+          id?: string
+          messages_received?: number
+          messages_sent?: number
+          posts_created?: number
+        }
+        Relationships: []
+      }
+      fingerprints: {
+        Row: {
+          created_at: string
+          device_id: string
+          fingerprint: string
+          id: string
+          kind: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          fingerprint: string
+          id?: string
+          kind: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          fingerprint?: string
+          id?: string
+          kind?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          created_at: string
+          device_id: string
+          headline: string | null
+          id: string
+          name: string
+          notes: string
+          profile_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          headline?: string | null
+          id?: string
+          name: string
+          notes?: string
+          profile_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          headline?: string | null
+          id?: string
+          name?: string
+          notes?: string
+          profile_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          ai_generated: boolean
+          content: string
+          created_at: string
+          device_id: string
+          direction: string
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          content: string
+          created_at?: string
+          device_id: string
+          direction: string
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          ai_generated?: boolean
+          content?: string
+          created_at?: string
+          device_id?: string
+          direction?: string
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,112 +172,6 @@ export type Database = {
           id?: string
           plan?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      leads: {
-        Row: {
-          id: string
-          device_id: string
-          name: string
-          headline: string | null
-          profile_url: string | null
-          status: string
-          notes: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          device_id: string
-          name: string
-          headline?: string | null
-          profile_url?: string | null
-          status?: string
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          device_id?: string
-          name?: string
-          headline?: string | null
-          profile_url?: string | null
-          status?: string
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      messages: {
-        Row: {
-          id: string
-          device_id: string
-          lead_id: string
-          direction: string
-          content: string
-          ai_generated: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          device_id: string
-          lead_id: string
-          direction: string
-          content: string
-          ai_generated?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          device_id?: string
-          lead_id?: string
-          direction?: string
-          content?: string
-          ai_generated?: boolean
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_lead_id_fkey"
-            columns: ["lead_id"]
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      daily_activity: {
-        Row: {
-          id: string
-          device_id: string
-          date: string
-          connections_sent: number
-          comments_made: number
-          posts_created: number
-          messages_sent: number
-          messages_received: number
-        }
-        Insert: {
-          id?: string
-          device_id: string
-          date: string
-          connections_sent?: number
-          comments_made?: number
-          posts_created?: number
-          messages_sent?: number
-          messages_received?: number
-        }
-        Update: {
-          id?: string
-          device_id?: string
-          date?: string
-          connections_sent?: number
-          comments_made?: number
-          posts_created?: number
-          messages_sent?: number
-          messages_received?: number
         }
         Relationships: []
       }
