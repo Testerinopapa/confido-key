@@ -16,6 +16,7 @@ import {
   MoreHorizontal,
   Search,
   Send,
+  Settings,
   ShieldCheck,
   Sparkles,
   Terminal,
@@ -42,6 +43,7 @@ const nav = [
   ["Overview", "/dashboard", LayoutDashboard],
   ["Analytics", "/analytics", BarChart3],
   ["Extension", "/extension", Download],
+  ["Settings", "/settings", Settings],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
 const names = [

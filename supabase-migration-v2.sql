@@ -1,14 +1,9 @@
--- Run this in the Supabase SQL Editor. Safe to re-run.
+-- Idempotent migration — safe to run regardless of current DB state.
+-- Handles: fresh DB, partially migrated, or tables missing user_id column.
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- ── Step 1: Add user_id to any pre-existing tables ──
-
-ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS user_id UUID;
-ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS user_id UUID;
-ALTER TABLE public.daily_activity ADD COLUMN IF NOT EXISTS user_id UUID;
-
--- ── Step 2: Create tables (if new install) ──
+-- ── Tables (create if missing, with all columns) ──
 
 CREATE TABLE IF NOT EXISTS public.api_keys (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -64,7 +59,29 @@ CREATE TABLE IF NOT EXISTS public.fingerprints (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ── Step 3: Indexes ──
+-- ── Add user_id to tables that exist but lack the column ──
+
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name IN ('leads', 'messages', 'daily_activity', 'fingerprints')
+      AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = information_schema.tables.table_name
+          AND column_name = 'user_id'
+      )
+  LOOP
+    EXECUTE format('ALTER TABLE public.%I ADD COLUMN user_id UUID;', r.table_name);
+  END LOOP;
+END $$;
+
+-- ── Indexes ──
 
 CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON public.api_keys (user_id);
 CREATE INDEX IF NOT EXISTS idx_api_keys_key ON public.api_keys (key);
@@ -85,7 +102,7 @@ CREATE INDEX IF NOT EXISTS idx_daily_activity_date ON public.daily_activity (dat
 CREATE INDEX IF NOT EXISTS idx_fingerprints_user_id ON public.fingerprints (user_id);
 CREATE INDEX IF NOT EXISTS idx_fingerprints_device_id ON public.fingerprints (device_id);
 
--- ── Step 4: RLS ──
+-- ── RLS ──
 
 ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
@@ -93,7 +110,7 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_activity ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fingerprints ENABLE ROW LEVEL SECURITY;
 
--- ── Step 5: Policies ──
+-- ── RLS Policies (idempotent) ──
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can manage own api keys') THEN
@@ -112,7 +129,3 @@ DO $$ BEGIN
     CREATE POLICY "Users can view own fingerprints" ON public.fingerprints FOR SELECT USING (auth.uid() = user_id);
   END IF;
 END $$;
-
-CREATE OR REPLACE FUNCTION generate_api_key() RETURNS TEXT AS $$
-  SELECT 'sk-' || encode(gen_random_bytes(24), 'hex');
-$$ LANGUAGE SQL;
