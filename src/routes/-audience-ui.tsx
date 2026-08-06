@@ -153,24 +153,21 @@ const installSteps = [
 
 export function ExtensionDownload() {
   const [state, setState] = useState<"idle" | "busy" | "error">("idle");
+  const fetchUrl = useServerFn(getExtensionDownloadUrl);
 
   function handleDownload() {
     setState("busy");
-    fetch(`/${EXTENSION_FILE}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
+    fetchUrl({})
+      .then(({ url, filename }) => {
         const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = EXTENSION_FILE;
+        a.href = url;
+        a.download = filename;
         a.click();
-        URL.revokeObjectURL(a.href);
         setState("idle");
       })
       .catch(() => setState("error"));
   }
+
 
   return (
     <section
