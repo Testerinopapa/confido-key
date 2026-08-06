@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, getDeviceId, validateApiKey } from "../auth";
+import { authError, resolveAuth } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -13,9 +13,8 @@ export const Route = createFileRoute("/api/public/sync/activity")({
     handlers: {
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        if (!validateApiKey(request)) return authError();
-        const deviceId = getDeviceId(request);
-        if (!deviceId) return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        const auth = await resolveAuth(request);
+        if (!auth) return authError();
 
         let body: any;
         try { body = await request.json(); } catch {
@@ -24,19 +23,21 @@ export const Route = createFileRoute("/api/public/sync/activity")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Upsert by date + device_id: increment counters
         const date = body.date || new Date().toISOString().slice(0, 10);
+        const { user_id, device_id } = auth;
 
-        // Fetch existing row for today
-        const { data: existing } = await supabaseAdmin
+        // Upsert by user_id+date (preferred) or device_id+date (fallback)
+        let query = supabaseAdmin
           .from("daily_activity")
           .select("id, connections_sent, comments_made, posts_created, messages_sent, messages_received")
-          .eq("device_id", deviceId)
-          .eq("date", date)
-          .maybeSingle();
+          .eq("date", date);
+        query = user_id ? query.eq("user_id", user_id) : query.eq("device_id", device_id);
+
+        const { data: existing } = await query.maybeSingle();
 
         const row = {
-          device_id: deviceId,
+          device_id,
+          user_id,
           date,
           connections_sent: (existing?.connections_sent ?? 0) + (body.connections_sent ?? 0),
           comments_made: (existing?.comments_made ?? 0) + (body.comments_made ?? 0),

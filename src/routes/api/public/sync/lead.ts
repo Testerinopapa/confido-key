@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, getDeviceId, validateApiKey } from "../auth";
+import { authError, resolveAuth } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -21,9 +21,9 @@ export const Route = createFileRoute("/api/public/sync/lead")({
     handlers: {
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        if (!validateApiKey(request)) return authError();
-        const deviceId = getDeviceId(request);
-        if (!deviceId) return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        const auth = await resolveAuth(request);
+        if (!auth) return authError();
+        const { user_id, device_id } = auth;
 
         let body: any;
         try { body = await request.json(); } catch {
@@ -36,21 +36,22 @@ export const Route = createFileRoute("/api/public/sync/lead")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Upsert by device_id + name
-        const { data: existing } = await supabaseAdmin
+        // Upsert by user_id+name (preferred) or device_id+name (fallback)
+        let query = supabaseAdmin
           .from("leads")
           .select("id, status, headline, profile_url")
-          .eq("device_id", deviceId)
-          .eq("name", body.name)
-          .maybeSingle();
+          .eq("name", body.name);
+        query = user_id ? query.eq("user_id", user_id) : query.eq("device_id", device_id);
 
-        // Don't downgrade: only apply the new status if it's "higher" or the lead is new
+        const { data: existing } = await query.maybeSingle();
+
         const nextStatus = existing
           ? statusRank(status) >= statusRank(existing.status) ? status : existing.status
           : status;
 
         const row = {
-          device_id: deviceId,
+          device_id,
+          user_id,
           name: body.name,
           headline: body.headline || existing?.headline || null,
           profile_url: body.profile_url || existing?.profile_url || null,
