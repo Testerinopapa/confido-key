@@ -40,10 +40,7 @@ const metrics = [
 
 const nav = [
   ["Overview", "/dashboard", LayoutDashboard],
-  ["Activity", "/analytics", CheckCircle2],
   ["Analytics", "/analytics", BarChart3],
-  ["Campaigns", "/pipeline", Send],
-  ["Reports", "/analytics", FileText],
   ["Extension", "/extension", Download],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
