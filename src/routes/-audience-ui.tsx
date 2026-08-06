@@ -42,7 +42,7 @@ const nav = [
   ["Analytics", "/analytics", BarChart3],
   ["Campaigns", "/pipeline", Send],
   ["Reports", "/analytics", FileText],
-  ["Alerts", "/dashboard", Bell],
+  ["Extension", "/extension", Download],
   ["Settings", "/settings", Settings],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
@@ -340,7 +340,7 @@ export function LandingPage() {
           ))}
         </div>
 
-        <ExtensionDownload />
+        
 
 
 
