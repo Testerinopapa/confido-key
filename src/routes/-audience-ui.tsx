@@ -144,7 +144,6 @@ export function Chart({ compact = false }: { compact?: boolean }) {
   );
 }
 
-const EXTENSION_FILE = "audiencepilot-extension.zip";
 
 const installSteps = [
   "Download and unzip the extension package.",
