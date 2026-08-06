@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "AudiencePilot for LinkedIn",
+  "version": "1.0.0",
+  "description": "LinkedIn automation with AI text and images — API keys stay on the AudiencePilot server, never in your browser.",
+  "permissions": ["storage", "tabs", "scripting", "alarms"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://confido-key.lovable.app/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "48": "icon.png", "128": "icon.png" }
+}

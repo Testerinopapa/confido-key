@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AudiencePilot</title>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        width: 340px;
+        margin: 0;
+        padding: 16px;
+        font: 13px/1.5 system-ui, -apple-system, Segoe UI, sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+      }
+      h1 { font-size: 15px; margin: 0 0 2px; letter-spacing: -0.02em; }
+      p.sub { margin: 0 0 14px; color: #64748b; font-size: 12px; }
+      label { display: block; font-weight: 600; font-size: 11px; margin: 10px 0 4px; color: #475569; }
+      input, textarea {
+        width: 100%; box-sizing: border-box; padding: 7px 9px; font: inherit;
+        border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      }
+      button {
+        margin-top: 12px; width: 100%; padding: 9px; font: inherit; font-weight: 600;
+        color: #fff; background: #2563eb; border: 0; border-radius: 8px; cursor: pointer;
+      }
+      button.secondary { background: #e2e8f0; color: #1e293b; }
+      .status { margin-top: 12px; font-size: 12px; color: #475569; min-height: 18px; white-space: pre-wrap; }
+      .ok { color: #15803d; } .err { color: #b91c1c; }
+      .note { margin-top: 14px; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+      img.preview { margin-top: 10px; width: 100%; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>AudiencePilot</h1>
+    <p class="sub">Claude &amp; Gemini keys are hosted for you — nothing to paste.</p>
+
+    <label for="apiBase">Proxy URL</label>
+    <input id="apiBase" placeholder="https://confido-key.lovable.app" />
+
+    <label for="proxyApiKey">Proxy API key (optional)</label>
+    <input id="proxyApiKey" type="password" placeholder="Only if your proxy requires one" />
+
+    <button id="save" class="secondary">Save settings</button>
+    <button id="test">Test connection</button>
+
+    <label for="prompt">Draft with Claude</label>
+    <textarea id="prompt" rows="3" placeholder="Write a short LinkedIn reply about AI hiring"></textarea>
+    <button id="draft">Generate text</button>
+    <button id="image" class="secondary">Generate image (Gemini)</button>
+
+    <div class="status" id="status"></div>
+    <img id="preview" class="preview" hidden alt="Generated image preview" />
+
+    <p class="note">No API keys are stored in this extension. All AI calls go through your AudiencePilot proxy.</p>
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
