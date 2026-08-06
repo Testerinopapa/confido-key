@@ -16,7 +16,6 @@ import {
   MoreHorizontal,
   Search,
   Send,
-  Settings,
   ShieldCheck,
   Sparkles,
   Terminal,
@@ -43,7 +42,6 @@ const nav = [
   ["Campaigns", "/pipeline", Send],
   ["Reports", "/analytics", FileText],
   ["Extension", "/extension", Download],
-  ["Settings", "/settings", Settings],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
 const names = [
@@ -542,54 +540,6 @@ export function DashboardPage() {
       <div className="chart-card mt-4">
         <b>Performance Overview</b>
         <Chart />
-      </div>
-    </AppChrome>
-  );
-}
-
-export function SettingsPage() {
-  return (
-    <AppChrome active="Settings">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2>Settings</h2>
-          <p>Configure automation behavior, limits, content and scheduling.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="soft">
-            <Upload className="h-3 w-3" />
-            Import
-          </Button>
-          <Button variant="soft">
-            <Download className="h-3 w-3" />
-            Export
-          </Button>
-          <Button>Save Changes</Button>
-        </div>
-      </div>
-      <h3>Daily Limits & Speed</h3>
-      <div className="settings-grid">
-        {[
-          "Daily connection limit",
-          "Speed preset",
-          "Session duration cap",
-          "Connection note",
-          "Randomization",
-          "Smart dedup",
-          "Keyword / Hashtag",
-          "Topic / Niche",
-          "Intervals",
-          "Reply pool",
-          "Delay range",
-          "Daily Campaigns",
-        ].map((x, i) => (
-          <div className={i === 3 || i === 11 ? "setting wide" : "setting"} key={x}>
-            <b>{x}</b>
-            <div className="input-fake">
-              {i % 3 === 0 ? "100" : i % 3 === 1 ? "Normal" : "60 minutes"}
-            </div>
-          </div>
-        ))}
       </div>
     </AppChrome>
   );

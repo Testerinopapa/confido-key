@@ -17,7 +17,6 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedExtensionRouteImport } from './routes/_authenticated/extension'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
@@ -64,11 +63,6 @@ const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
   path: '/pipeline',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const ApiPublicClaudeRoute = ApiPublicClaudeRouteImport.update({
   id: '/api/public/claude',
   path: '/api/public/claude',
@@ -108,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/extension': typeof AuthenticatedExtensionRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
-  '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -124,7 +117,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/extension': typeof AuthenticatedExtensionRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
-  '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -142,7 +134,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/extension': typeof AuthenticatedExtensionRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -160,7 +151,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/extension'
     | '/pipeline'
-    | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
@@ -176,7 +166,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/extension'
     | '/pipeline'
-    | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
@@ -193,7 +182,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/extension'
     | '/_authenticated/pipeline'
-    | '/_authenticated/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
@@ -273,13 +261,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPipelineRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/api/public/claude': {
       id: '/api/public/claude'
       path: '/api/public/claude'
@@ -330,7 +311,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedExtensionRoute: typeof AuthenticatedExtensionRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -338,7 +318,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedExtensionRoute: AuthenticatedExtensionRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
