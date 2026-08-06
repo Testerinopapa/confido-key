@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import {
   AlertCircle,
   BarChart3,
@@ -86,11 +87,16 @@ export function Logo() {
 export function Button({
   children,
   variant = "primary",
+  ...rest
 }: {
   children: ReactNode;
   variant?: "primary" | "ghost" | "soft";
-}) {
-  return <button className={`btn ${variant}`}>{children}</button>;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className">) {
+  return (
+    <button className={`btn ${variant}`} {...rest}>
+      {children}
+    </button>
+  );
 }
 
 export function Chart({ compact = false }: { compact?: boolean }) {
