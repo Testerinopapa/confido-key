@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   AlertCircle,
   BarChart3,
-  Bell,
+
   CheckCircle2,
   ChevronDown,
   Download,
@@ -42,7 +42,7 @@ const nav = [
   ["Analytics", "/analytics", BarChart3],
   ["Campaigns", "/pipeline", Send],
   ["Reports", "/analytics", FileText],
-  ["Alerts", "/dashboard", Bell],
+  ["Extension", "/extension", Download],
   ["Settings", "/settings", Settings],
 ] as const;
 const columns = ["New", "Connected", "Messaged", "Replied", "Follow-up Due", "Archived"];
@@ -340,7 +340,7 @@ export function LandingPage() {
           ))}
         </div>
 
-        <ExtensionDownload />
+        
 
 
 
@@ -480,7 +480,7 @@ export function AppChrome({
                   <Link to={to} className={`nav ${active === item ? "on" : ""}`} key={item}>
                     <Icon className="h-4 w-4" />
                     <span>{item}</span>
-                    {item === "Alerts" && unreadAlerts > 0 ? <small>{unreadAlerts}</small> : null}
+                    {item === "Reports" && unreadAlerts > 0 ? <small>{unreadAlerts}</small> : null}
                   </Link>
                 ))}
               </nav>
