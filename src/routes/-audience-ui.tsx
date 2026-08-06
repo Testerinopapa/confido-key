@@ -480,7 +480,7 @@ export function AppChrome({
                   <Link to={to} className={`nav ${active === item ? "on" : ""}`} key={item}>
                     <Icon className="h-4 w-4" />
                     <span>{item}</span>
-                    {item === "Alerts" && unreadAlerts > 0 ? <small>{unreadAlerts}</small> : null}
+                    {item === "Reports" && unreadAlerts > 0 ? <small>{unreadAlerts}</small> : null}
                   </Link>
                 ))}
               </nav>
