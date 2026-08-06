@@ -10,6 +10,12 @@ const CORS_HEADERS = {
 
 const VALID_STATUSES = new Set(["new", "connected", "messaged", "replied", "followup_due", "archived"]);
 
+const STATUS_RANK: Record<string, number> = { new: 0, connected: 1, messaged: 2, replied: 3, followup_due: 4, archived: 5 };
+
+function statusRank(s: string): number {
+  return STATUS_RANK[s] ?? 0;
+}
+
 export const Route = createFileRoute("/api/public/sync/lead")({
   server: {
     handlers: {
@@ -38,20 +44,22 @@ export const Route = createFileRoute("/api/public/sync/lead")({
           .eq("name", body.name)
           .maybeSingle();
 
+        // Don't downgrade: only apply the new status if it's "higher" or the lead is new
+        const nextStatus = existing
+          ? statusRank(status) >= statusRank(existing.status) ? status : existing.status
+          : status;
+
         const row = {
           device_id: deviceId,
           name: body.name,
           headline: body.headline || existing?.headline || null,
           profile_url: body.profile_url || existing?.profile_url || null,
-          status: body.connected ? "connected" : (existing?.status ?? status),
+          status: nextStatus,
           updated_at: new Date().toISOString(),
         };
 
         let leadId: string;
         if (existing) {
-          if (status === "messaged" && existing.status === "replied") {
-            return Response.json({ id: existing.id }, { headers: CORS_HEADERS });
-          }
           const { error } = await supabaseAdmin.from("leads").update(row).eq("id", existing.id);
           if (error) {
             console.error("[sync/lead] update error", error);
