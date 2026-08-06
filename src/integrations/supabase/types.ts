@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          last_used_at: string | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          last_used_at?: string | null
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          last_used_at?: string | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_activity: {
         Row: {
           comments_made: number
@@ -24,6 +51,7 @@ export type Database = {
           messages_received: number
           messages_sent: number
           posts_created: number
+          user_id: string | null
         }
         Insert: {
           comments_made?: number
@@ -34,6 +62,7 @@ export type Database = {
           messages_received?: number
           messages_sent?: number
           posts_created?: number
+          user_id?: string | null
         }
         Update: {
           comments_made?: number
@@ -44,6 +73,7 @@ export type Database = {
           messages_received?: number
           messages_sent?: number
           posts_created?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -54,6 +84,7 @@ export type Database = {
           fingerprint: string
           id: string
           kind: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -61,6 +92,7 @@ export type Database = {
           fingerprint: string
           id?: string
           kind: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -68,6 +100,7 @@ export type Database = {
           fingerprint?: string
           id?: string
           kind?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -82,6 +115,7 @@ export type Database = {
           profile_url: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -93,6 +127,7 @@ export type Database = {
           profile_url?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -104,6 +139,7 @@ export type Database = {
           profile_url?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -116,6 +152,7 @@ export type Database = {
           direction: string
           id: string
           lead_id: string
+          user_id: string | null
         }
         Insert: {
           ai_generated?: boolean
@@ -125,6 +162,7 @@ export type Database = {
           direction: string
           id?: string
           lead_id: string
+          user_id?: string | null
         }
         Update: {
           ai_generated?: boolean
@@ -134,6 +172,7 @@ export type Database = {
           direction?: string
           id?: string
           lead_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
