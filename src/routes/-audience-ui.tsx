@@ -91,7 +91,7 @@ export function Button({
 }: {
   children: ReactNode;
   variant?: "primary" | "ghost" | "soft";
-} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className">) {
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className">) {
   return (
     <button className={`btn ${variant}`} {...rest}>
       {children}
