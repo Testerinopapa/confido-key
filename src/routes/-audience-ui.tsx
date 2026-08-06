@@ -257,6 +257,10 @@ export function LandingPage() {
           ))}
         </div>
 
+        <ExtensionDownload />
+
+
+
         <section className="mx-auto mt-20 max-w-3xl space-y-6">
           <h2 className="text-sm font-semibold tracking-wider text-slate-500 uppercase">
             API Endpoints
