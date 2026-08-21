@@ -6,15 +6,25 @@ const DEFAULT_CONFIG = {
   geminiModel: "gemini-3.1-flash-image-preview",
 };
 
+let deviceIdPromise;
+
 async function getConfig() {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULT_CONFIG));
   return { ...DEFAULT_CONFIG, ...stored };
 }
 
 async function getDeviceId() {
-  const { deviceId } = await chrome.storage.local.get("deviceId");
-  if (deviceId) return deviceId;
-  const next = crypto.randomUUID();
-  await chrome.storage.local.set({ deviceId: next });
-  return next;
+  if (!deviceIdPromise) {
+    deviceIdPromise = (async () => {
+      const { deviceId } = await chrome.storage.local.get("deviceId");
+      if (deviceId) return deviceId;
+      const next = crypto.randomUUID();
+      await chrome.storage.local.set({ deviceId: next });
+      return next;
+    })().catch((error) => {
+      deviceIdPromise = null;
+      throw error;
+    });
+  }
+  return deviceIdPromise;
 }
