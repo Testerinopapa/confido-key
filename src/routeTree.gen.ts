@@ -19,10 +19,10 @@ import { Route as AuthenticatedExtensionRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiExtensionCodeRouteImport } from './routes/api/extension/code'
+import { Route as ApiPublicClaimRouteImport } from './routes/api/public/claim'
 import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
-import { Route as ApiPublicClaimRouteImport } from './routes/api/public/claim'
 import { Route as ApiPublicSyncActivityRouteImport } from './routes/api/public/sync/activity'
 import { Route as ApiPublicSyncFingerprintsRouteImport } from './routes/api/public/sync/fingerprints'
 import { Route as ApiPublicSyncLeadRouteImport } from './routes/api/public/sync/lead'
@@ -77,6 +77,11 @@ const ApiExtensionCodeRoute = ApiExtensionCodeRouteImport.update({
   path: '/api/extension/code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicClaimRoute = ApiPublicClaimRouteImport.update({
+  id: '/api/public/claim',
+  path: '/api/public/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicClaudeRoute = ApiPublicClaudeRouteImport.update({
   id: '/api/public/claude',
   path: '/api/public/claude',
@@ -90,11 +95,6 @@ const ApiPublicGeminiRoute = ApiPublicGeminiRouteImport.update({
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicClaimRoute = ApiPublicClaimRouteImport.update({
-  id: '/api/public/claim',
-  path: '/api/public/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSyncActivityRoute = ApiPublicSyncActivityRouteImport.update({
@@ -129,10 +129,10 @@ export interface FileRoutesByFullPath {
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/extension/code': typeof ApiExtensionCodeRoute
+  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -148,10 +148,10 @@ export interface FileRoutesByTo {
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/extension/code': typeof ApiExtensionCodeRoute
+  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -169,10 +169,10 @@ export interface FileRoutesById {
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/extension/code': typeof ApiExtensionCodeRoute
+  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/claim': typeof ApiPublicClaimRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -190,10 +190,10 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/settings'
     | '/api/extension/code'
+    | '/api/public/claim'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
-    | '/api/public/claim'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -209,10 +209,10 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/settings'
     | '/api/extension/code'
+    | '/api/public/claim'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
-    | '/api/public/claim'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -229,10 +229,10 @@ export interface FileRouteTypes {
     | '/_authenticated/pipeline'
     | '/_authenticated/settings'
     | '/api/extension/code'
+    | '/api/public/claim'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
-    | '/api/public/claim'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -245,10 +245,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiExtensionCodeRoute: typeof ApiExtensionCodeRoute
+  ApiPublicClaimRoute: typeof ApiPublicClaimRoute
   ApiPublicClaudeRoute: typeof ApiPublicClaudeRoute
   ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
-  ApiPublicClaimRoute: typeof ApiPublicClaimRoute
   ApiPublicSyncActivityRoute: typeof ApiPublicSyncActivityRoute
   ApiPublicSyncFingerprintsRoute: typeof ApiPublicSyncFingerprintsRoute
   ApiPublicSyncLeadRoute: typeof ApiPublicSyncLeadRoute
@@ -283,13 +283,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/extension/code': {
-      id: '/api/extension/code'
-      path: '/api/extension/code'
-      fullPath: '/api/extension/code'
-      preLoaderRoute: typeof ApiExtensionCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/analytics': {
@@ -327,6 +320,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/extension/code': {
+      id: '/api/extension/code'
+      path: '/api/extension/code'
+      fullPath: '/api/extension/code'
+      preLoaderRoute: typeof ApiExtensionCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/claim': {
+      id: '/api/public/claim'
+      path: '/api/public/claim'
+      fullPath: '/api/public/claim'
+      preLoaderRoute: typeof ApiPublicClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/claude': {
       id: '/api/public/claude'
       path: '/api/public/claude'
@@ -346,13 +353,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/health'
       fullPath: '/api/public/health'
       preLoaderRoute: typeof ApiPublicHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/claim': {
-      id: '/api/public/claim'
-      path: '/api/public/claim'
-      fullPath: '/api/public/claim'
-      preLoaderRoute: typeof ApiPublicClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/sync/activity': {
@@ -411,10 +411,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiExtensionCodeRoute: ApiExtensionCodeRoute,
+  ApiPublicClaimRoute: ApiPublicClaimRoute,
   ApiPublicClaudeRoute: ApiPublicClaudeRoute,
   ApiPublicGeminiRoute: ApiPublicGeminiRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
-  ApiPublicClaimRoute: ApiPublicClaimRoute,
   ApiPublicSyncActivityRoute: ApiPublicSyncActivityRoute,
   ApiPublicSyncFingerprintsRoute: ApiPublicSyncFingerprintsRoute,
   ApiPublicSyncLeadRoute: ApiPublicSyncLeadRoute,
