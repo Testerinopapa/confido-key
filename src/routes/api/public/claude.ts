@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, validateApiKey } from "./auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Api-Key",
+  "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -13,8 +12,6 @@ export const Route = createFileRoute("/api/public/claude")({
     handlers: {
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        if (!validateApiKey(request)) return authError();
-
         const apiKey = process.env["ANTHROPIC_API_KEY"];
         if (!apiKey) {
           return Response.json(

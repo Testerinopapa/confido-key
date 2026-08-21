@@ -2,7 +2,6 @@
 // The proxy hosts the Claude + Gemini keys server-side, so no API keys live here.
 const DEFAULT_CONFIG = {
   apiBase: "https://confido-key.lovable.app",
-  proxyApiKey: "",
   claudeModel: "claude-haiku-4-5-20251001",
   geminiModel: "gemini-3.1-flash-image-preview",
 };

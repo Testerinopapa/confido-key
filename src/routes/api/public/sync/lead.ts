@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, resolveAuth } from "../auth";
+import { getDeviceId } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Api-Key, X-Device-Id",
+  "Access-Control-Allow-Headers": "Content-Type, X-Device-Id",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -21,9 +21,10 @@ export const Route = createFileRoute("/api/public/sync/lead")({
     handlers: {
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        const auth = await resolveAuth(request);
-        if (!auth) return authError();
-        const { user_id, device_id } = auth;
+        const device_id = getDeviceId(request);
+        if (!device_id) {
+          return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        }
 
         let body: any;
         try { body = await request.json(); } catch {
@@ -36,12 +37,11 @@ export const Route = createFileRoute("/api/public/sync/lead")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Upsert by user_id+name (preferred) or device_id+name (fallback)
         let query = supabaseAdmin
           .from("leads")
           .select("id, status, headline, profile_url")
+          .eq("device_id", device_id)
           .eq("name", body.name);
-        query = user_id ? query.eq("user_id", user_id) : query.eq("device_id", device_id);
 
         const { data: existing } = await query.maybeSingle();
 
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/public/sync/lead")({
 
         const row = {
           device_id,
-          user_id,
+          user_id: null,
           name: body.name,
           headline: body.headline || existing?.headline || null,
           profile_url: body.profile_url || existing?.profile_url || null,

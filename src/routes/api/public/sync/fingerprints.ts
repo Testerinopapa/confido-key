@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, resolveAuth } from "../auth";
+import { getDeviceId } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Api-Key, X-Device-Id",
+  "Access-Control-Allow-Headers": "Content-Type, X-Device-Id",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -14,15 +14,17 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
 
       GET: async ({ request }) => {
-        const auth = await resolveAuth(request);
-        if (!auth) return authError();
-        const { user_id, device_id } = auth;
+        const device_id = getDeviceId(request);
+        if (!device_id) {
+          return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        let q = supabaseAdmin.from("fingerprints").select("fingerprint, kind");
-        q = user_id ? q.eq("user_id", user_id) : q.eq("device_id", device_id);
+        const { data } = await supabaseAdmin
+          .from("fingerprints")
+          .select("fingerprint, kind")
+          .eq("device_id", device_id);
 
-        const { data } = await q;
         const comments = (data ?? []).filter(f => f.kind === "comment").map(f => f.fingerprint);
         const posts = (data ?? []).filter(f => f.kind === "post").map(f => f.fingerprint);
 
@@ -30,9 +32,10 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
       },
 
       POST: async ({ request }) => {
-        const auth = await resolveAuth(request);
-        if (!auth) return authError();
-        const { user_id, device_id } = auth;
+        const device_id = getDeviceId(request);
+        if (!device_id) {
+          return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        }
 
         let body: any;
         try { body = await request.json(); } catch {
@@ -49,10 +52,24 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { error } = await supabaseAdmin.from("fingerprints").upsert(
-          { device_id, user_id, fingerprint: body.fingerprint, kind: body.kind },
-          { onConflict: "fingerprint,kind,COALESCE(user_id, device_id)" },
-        );
+        const { data: existing } = await supabaseAdmin
+          .from("fingerprints")
+          .select("id")
+          .eq("device_id", device_id)
+          .eq("fingerprint", body.fingerprint)
+          .eq("kind", body.kind)
+          .maybeSingle();
+
+        let error = null;
+        if (!existing) {
+          const result = await supabaseAdmin.from("fingerprints").insert({
+            device_id,
+            user_id: null,
+            fingerprint: body.fingerprint,
+            kind: body.kind,
+          });
+          error = result.error;
+        }
 
         if (error) {
           console.error("[sync/fingerprints] upsert error", error);

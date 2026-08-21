@@ -10,7 +10,6 @@ export const Route = createFileRoute("/api/public/health")({
       GET: () => {
         const hasClaude = !!process.env["ANTHROPIC_API_KEY"];
         const hasGemini = !!process.env["GEMINI_API_KEY"];
-        const hasAuth = !!process.env["API_KEYS"];
 
         return Response.json(
           {
@@ -20,7 +19,6 @@ export const Route = createFileRoute("/api/public/health")({
               claude: hasClaude,
               gemini: hasGemini,
             },
-            authRequired: hasAuth,
           },
           { headers: CORS_HEADERS },
         );

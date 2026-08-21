@@ -2,9 +2,7 @@ importScripts("config.js");
 
 async function proxyHeaders() {
   const cfg = await getConfig();
-  const headers = { "Content-Type": "application/json", "X-Device-Id": await getDeviceId() };
-  if (cfg.proxyApiKey) headers["X-Api-Key"] = cfg.proxyApiKey;
-  return { cfg, headers };
+  return { cfg, headers: { "Content-Type": "application/json", "X-Device-Id": await getDeviceId() } };
 }
 
 async function callClaude({ prompt, maxTokens = 400 }) {
