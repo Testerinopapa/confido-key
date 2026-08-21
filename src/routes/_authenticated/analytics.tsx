@@ -537,7 +537,7 @@ function TopCampaignCard({
 }
 
 function Analytics() {
-  const [range, setRange] = useState<DateRange>("7");
+  const [range, setRange] = useState<DateRange>("30");
   const days = Number(range);
   const {
     data: activity = [],

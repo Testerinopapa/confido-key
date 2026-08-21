@@ -22,6 +22,7 @@ function Dashboard() {
       const { data } = await supabase.from("daily_activity").select("*").order("date", { ascending: false }).limit(30);
       return data ?? [];
     },
+    refetchInterval: 30_000,
   });
 
   const { data: leads } = useQuery({
@@ -45,7 +46,7 @@ function Dashboard() {
   }), { connections_sent: 0, comments_made: 0, posts_created: 0, messages_sent: 0, messages_received: 0 });
 
   return (
-    <AppChrome>
+    <AppChrome usageTotals={totals}>
       <div className="topbar">
         <div>
           <h2>Overview</h2>
@@ -56,11 +57,11 @@ function Dashboard() {
         </div>
       </div>
       <div className="analytics-metrics">
-        <StatCard icon={<Send className="h-5 w-5 text-blue-600" />} label="Connections Sent" value={String(totals.connections_sent)} change="Total" />
-        <StatCard icon={<MessageCircle className="h-5 w-5 text-blue-600" />} label="Comments Made" value={String(totals.comments_made)} change="Total" />
-        <StatCard icon={<FileText className="h-5 w-5 text-blue-600" />} label="Posts Created" value={String(totals.posts_created)} change="Total" />
-        <StatCard icon={<Inbox className="h-5 w-5 text-blue-600" />} label="Messages Sent" value={String(totals.messages_sent)} change="Total" />
-        <StatCard icon={<CheckCircle2 className="h-5 w-5 text-blue-600" />} label="Replies Received" value={String(totals.messages_received)} change="Total" />
+        <StatCard icon={<Send className="h-5 w-5 text-blue-600" />} label="Connections Sent" value={String(totals.connections_sent)} change="Last 30 days" />
+        <StatCard icon={<MessageCircle className="h-5 w-5 text-blue-600" />} label="Comments Made" value={String(totals.comments_made)} change="Last 30 days" />
+        <StatCard icon={<FileText className="h-5 w-5 text-blue-600" />} label="Posts Created" value={String(totals.posts_created)} change="Last 30 days" />
+        <StatCard icon={<Inbox className="h-5 w-5 text-blue-600" />} label="Messages Sent" value={String(totals.messages_sent)} change="Last 30 days" />
+        <StatCard icon={<CheckCircle2 className="h-5 w-5 text-blue-600" />} label="Replies Received" value={String(totals.messages_received)} change="Last 30 days" />
       </div>
       <div className="chart-card mt-4">
         <b>Today's Activity</b>
