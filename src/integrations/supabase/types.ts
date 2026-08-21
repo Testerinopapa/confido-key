@@ -219,7 +219,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_daily_activity: {
+        Args: {
+          p_comments_made: number
+          p_connections_sent: number
+          p_date: string
+          p_device_id: string
+          p_messages_received: number
+          p_messages_sent: number
+          p_posts_created: number
+        }
+        Returns: {
+          comments_made: number
+          connections_sent: number
+          date: string
+          device_id: string
+          id: string
+          messages_received: number
+          messages_sent: number
+          posts_created: number
+          user_id: string | null
+        }
+      }
     }
     Enums: {
       [_ in never]: never
