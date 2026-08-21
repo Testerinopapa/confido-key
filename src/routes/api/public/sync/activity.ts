@@ -26,31 +26,18 @@ export const Route = createFileRoute("/api/public/sync/activity")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const date = body.date || new Date().toISOString().slice(0, 10);
-        let query = supabaseAdmin
-          .from("daily_activity")
-          .select("id, connections_sent, comments_made, posts_created, messages_sent, messages_received")
-          .eq("device_id", device_id)
-          .eq("date", date);
-
-        const { data: existing } = await query.maybeSingle();
-
-        const row = {
-          device_id,
-          user_id: null,
-          date,
-          connections_sent: (existing?.connections_sent ?? 0) + (body.connections_sent ?? 0),
-          comments_made: (existing?.comments_made ?? 0) + (body.comments_made ?? 0),
-          posts_created: (existing?.posts_created ?? 0) + (body.posts_created ?? 0),
-          messages_sent: (existing?.messages_sent ?? 0) + (body.messages_sent ?? 0),
-          messages_received: (existing?.messages_received ?? 0) + (body.messages_received ?? 0),
-        };
-
-        const { error } = existing
-          ? await supabaseAdmin.from("daily_activity").update(row).eq("id", existing.id)
-          : await supabaseAdmin.from("daily_activity").insert(row);
+        const { error } = await supabaseAdmin.rpc("increment_daily_activity", {
+          p_device_id: device_id,
+          p_date: date,
+          p_connections_sent: body.connections_sent ?? 0,
+          p_comments_made: body.comments_made ?? 0,
+          p_posts_created: body.posts_created ?? 0,
+          p_messages_sent: body.messages_sent ?? 0,
+          p_messages_received: body.messages_received ?? 0,
+        });
 
         if (error) {
-          console.error("[sync/activity] upsert error", error);
+          console.error("[sync/activity] atomic increment error", error);
           return Response.json({ error: "Failed to sync activity" }, { status: 500, headers: CORS_HEADERS });
         }
 
