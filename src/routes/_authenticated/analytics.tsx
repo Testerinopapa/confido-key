@@ -371,8 +371,7 @@ function RecentActivity({ rows, messages }: { rows: ActivityRow[]; messages: Mes
           date: row.date,
           tone: metric.key,
         })),
-      )
-      .slice(0, 5),
+      ),
   ]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
@@ -576,6 +575,7 @@ function Analytics() {
         .limit(12);
       return (data ?? []) as MessageRow[];
     },
+    refetchInterval: 30_000,
   });
   const sorted = useMemo(
     () => [...activity].sort((a, b) => a.date.localeCompare(b.date)),
