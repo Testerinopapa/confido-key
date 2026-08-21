@@ -323,7 +323,7 @@ export function LandingPage() {
             ],
             [
               "Secure API Proxy",
-              "Claude and Gemini keys stay server-side. Authenticated via X-Api-Key — never exposed to the browser.",
+              "Claude and Gemini keys stay server-side and are never exposed to the browser.",
             ],
           ].map(([title, desc]) => (
             <div className="feature" key={title}>
@@ -349,10 +349,10 @@ export function LandingPage() {
               method: "POST",
               path: "/api/public/claude",
               provider: "Anthropic Messages API",
-              note: "Body forwarded verbatim to /v1/messages. SSE streaming passes through. Requires X-Api-Key header.",
+              note: "Body forwarded verbatim to /v1/messages. SSE streaming passes through.",
               sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/claude", {
   method: "POST",
-  headers: { "Content-Type": "application/json", "X-Api-Key": "..." },
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 200,
@@ -364,10 +364,10 @@ export function LandingPage() {
               method: "POST",
               path: "/api/public/gemini",
               provider: "Google Generative Language API",
-              note: "Pass model, action, and payload. Supports generateContent, streamGenerateContent, countTokens, embedContent. Requires X-Api-Key header.",
+              note: "Pass model, action, and payload. Supports generateContent, streamGenerateContent, countTokens, embedContent.",
               sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/gemini", {
   method: "POST",
-  headers: { "Content-Type": "application/json", "X-Api-Key": "..." },
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     model: "gemini-3.1-flash-image-preview",
     action: "generateContent",
@@ -380,11 +380,11 @@ export function LandingPage() {
               method: "GET",
               path: "/api/public/health",
               provider: "Status check",
-              note: "Returns configured providers, version, and whether auth is required. No API key needed.",
+              note: "Returns configured providers and version.",
               sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/health")
   .then(r => r.json())
   .then(console.log);
-// { status: "ok", version: "1.0.0", providers: { claude: true, gemini: true }, authRequired: true }`,
+// { status: "ok", version: "1.0.0", providers: { claude: true, gemini: true } }`,
             },
           ].map((ep) => (
             <article
@@ -407,15 +407,11 @@ export function LandingPage() {
           ))}
         </section>
 
-        <section className="mx-auto mt-16 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 p-5">
-          <h2 className="text-sm font-semibold text-amber-800">Secured by API key</h2>
-          <p className="mt-2 text-sm leading-relaxed text-amber-700">
-            These endpoints require an{" "}
-            <code className="rounded bg-amber-200 px-1 text-xs font-semibold">X-Api-Key</code>{" "}
-            header when{" "}
-            <code className="rounded bg-amber-200 px-1 text-xs font-semibold">API_KEYS</code> is set
-            on the server. Add your key in the extension settings under "Proxy API Key" to
-            authenticate. Without a valid key, the endpoints return 401.
+        <section className="mx-auto mt-16 max-w-3xl rounded-xl border border-blue-200 bg-blue-50 p-5">
+          <h2 className="text-sm font-semibold text-blue-800">Server-side AI keys</h2>
+          <p className="mt-2 text-sm leading-relaxed text-blue-700">
+            The extension sends requests through this app using its device ID. Claude and Gemini
+            provider keys remain on the server and are never entered into the extension.
           </p>
         </section>
       </section>

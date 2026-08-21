@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { authError, resolveAuth } from "../auth";
+import { getDeviceId } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Api-Key, X-Device-Id",
+  "Access-Control-Allow-Headers": "Content-Type, X-Device-Id",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -13,9 +13,10 @@ export const Route = createFileRoute("/api/public/sync/message")({
     handlers: {
       OPTIONS: () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        const auth = await resolveAuth(request);
-        if (!auth) return authError();
-        const { user_id, device_id } = auth;
+        const device_id = getDeviceId(request);
+        if (!device_id) {
+          return Response.json({ error: "Missing X-Device-Id header" }, { status: 400, headers: CORS_HEADERS });
+        }
 
         let body: any;
         try { body = await request.json(); } catch {
@@ -30,8 +31,7 @@ export const Route = createFileRoute("/api/public/sync/message")({
 
         let leadId = body.lead_id as string | undefined;
         if (!leadId && body.lead_name) {
-          let q = supabaseAdmin.from("leads").select("id").eq("name", body.lead_name);
-          q = user_id ? q.eq("user_id", user_id) : q.eq("device_id", device_id);
+          const q = supabaseAdmin.from("leads").select("id").eq("device_id", device_id).eq("name", body.lead_name);
           const { data } = await q.maybeSingle();
           leadId = data?.id;
         }
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/public/sync/message")({
 
         const { error } = await supabaseAdmin.from("messages").insert({
           device_id,
-          user_id,
+          user_id: null,
           lead_id: leadId,
           direction,
           content: body.content,

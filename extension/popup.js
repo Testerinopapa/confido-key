@@ -15,13 +15,11 @@ async function send(message) {
 (async () => {
   const cfg = await getConfig();
   el("apiBase").value = cfg.apiBase;
-  el("proxyApiKey").value = cfg.proxyApiKey;
 })();
 
 el("save").addEventListener("click", async () => {
   await chrome.storage.local.set({
     apiBase: el("apiBase").value.trim().replace(/\/$/, ""),
-    proxyApiKey: el("proxyApiKey").value.trim(),
   });
   setStatus("Settings saved.", "ok");
 });

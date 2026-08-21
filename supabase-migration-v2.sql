@@ -117,15 +117,15 @@ DO $$ BEGIN
     CREATE POLICY "Users can manage own api keys" ON public.api_keys FOR ALL USING (auth.uid() = user_id);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own leads') THEN
-    CREATE POLICY "Users can view own leads" ON public.leads FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Users can view own leads" ON public.leads FOR SELECT USING (user_id IS NULL OR auth.uid() = user_id);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own messages') THEN
-    CREATE POLICY "Users can view own messages" ON public.messages FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Users can view own messages" ON public.messages FOR SELECT USING (user_id IS NULL OR auth.uid() = user_id);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own activity') THEN
-    CREATE POLICY "Users can view own activity" ON public.daily_activity FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Users can view own activity" ON public.daily_activity FOR SELECT USING (user_id IS NULL OR auth.uid() = user_id);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own fingerprints') THEN
-    CREATE POLICY "Users can view own fingerprints" ON public.fingerprints FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Users can view own fingerprints" ON public.fingerprints FOR SELECT USING (user_id IS NULL OR auth.uid() = user_id);
   END IF;
 END $$;
