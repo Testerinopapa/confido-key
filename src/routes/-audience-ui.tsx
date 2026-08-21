@@ -149,7 +149,7 @@ const installSteps = [
   "Open chrome://extensions in Chrome, Edge, Brave, or Arc.",
   "Turn on Developer mode (top-right toggle).",
   'Click "Load unpacked" and pick the unzipped folder.',
-  "Open the AudiencePilot popup and hit Test connection.",
+  "Open the extension Options page and confirm the service settings.",
 ];
 
 export function ExtensionDownload() {
@@ -178,7 +178,7 @@ export function ExtensionDownload() {
     >
       <div>
         <div className="pill">
-          <Download className="h-3.5 w-3.5" /> Chrome Extension · v1.0.0
+          <Download className="h-3.5 w-3.5" /> Chrome Extension · v2.1.3
         </div>
         <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">
           Download the extension
@@ -194,7 +194,7 @@ export function ExtensionDownload() {
               {state === "busy" ? "Preparing…" : "Download .zip"}
             </span>
           </Button>
-          <span className="text-xs font-medium text-slate-500">Manifest V3 · ~13 KB</span>
+          <span className="text-xs font-medium text-slate-500">Manifest V3 · ~205 KB</span>
         </div>
         {state === "error" ? (
           <p className="mt-3 text-xs font-semibold text-red-600">
