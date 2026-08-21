@@ -17,10 +17,12 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedExtensionRouteImport } from './routes/_authenticated/extension'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicSyncActivityRouteImport } from './routes/api/public/sync/activity'
+import { Route as ApiPublicSyncFingerprintsRouteImport } from './routes/api/public/sync/fingerprints'
 import { Route as ApiPublicSyncLeadRouteImport } from './routes/api/public/sync/lead'
 import { Route as ApiPublicSyncMessageRouteImport } from './routes/api/public/sync/message'
 
@@ -63,6 +65,11 @@ const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
   path: '/pipeline',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicClaudeRoute = ApiPublicClaudeRouteImport.update({
   id: '/api/public/claude',
   path: '/api/public/claude',
@@ -83,6 +90,12 @@ const ApiPublicSyncActivityRoute = ApiPublicSyncActivityRouteImport.update({
   path: '/api/public/sync/activity',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSyncFingerprintsRoute =
+  ApiPublicSyncFingerprintsRouteImport.update({
+    id: '/api/public/sync/fingerprints',
+    path: '/api/public/sync/fingerprints',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSyncLeadRoute = ApiPublicSyncLeadRouteImport.update({
   id: '/api/public/sync/lead',
   path: '/api/public/sync/lead',
@@ -102,10 +115,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/extension': typeof AuthenticatedExtensionRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
   '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
@@ -117,10 +132,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/extension': typeof AuthenticatedExtensionRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
   '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
@@ -134,10 +151,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/extension': typeof AuthenticatedExtensionRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/public/claude': typeof ApiPublicClaudeRoute
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
+  '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
   '/api/public/sync/message': typeof ApiPublicSyncMessageRoute
 }
@@ -151,10 +170,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/extension'
     | '/pipeline'
+    | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/sync/activity'
+    | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
     | '/api/public/sync/message'
   fileRoutesByTo: FileRoutesByTo
@@ -166,10 +187,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/extension'
     | '/pipeline'
+    | '/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/sync/activity'
+    | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
     | '/api/public/sync/message'
   id:
@@ -182,10 +205,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/extension'
     | '/_authenticated/pipeline'
+    | '/_authenticated/settings'
     | '/api/public/claude'
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/sync/activity'
+    | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
     | '/api/public/sync/message'
   fileRoutesById: FileRoutesById
@@ -199,6 +224,7 @@ export interface RootRouteChildren {
   ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicSyncActivityRoute: typeof ApiPublicSyncActivityRoute
+  ApiPublicSyncFingerprintsRoute: typeof ApiPublicSyncFingerprintsRoute
   ApiPublicSyncLeadRoute: typeof ApiPublicSyncLeadRoute
   ApiPublicSyncMessageRoute: typeof ApiPublicSyncMessageRoute
 }
@@ -261,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPipelineRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/claude': {
       id: '/api/public/claude'
       path: '/api/public/claude'
@@ -289,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSyncActivityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sync/fingerprints': {
+      id: '/api/public/sync/fingerprints'
+      path: '/api/public/sync/fingerprints'
+      fullPath: '/api/public/sync/fingerprints'
+      preLoaderRoute: typeof ApiPublicSyncFingerprintsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sync/lead': {
       id: '/api/public/sync/lead'
       path: '/api/public/sync/lead'
@@ -311,6 +351,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedExtensionRoute: typeof AuthenticatedExtensionRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -318,6 +359,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedExtensionRoute: AuthenticatedExtensionRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -332,9 +374,20 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGeminiRoute: ApiPublicGeminiRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicSyncActivityRoute: ApiPublicSyncActivityRoute,
+  ApiPublicSyncFingerprintsRoute: ApiPublicSyncFingerprintsRoute,
   ApiPublicSyncLeadRoute: ApiPublicSyncLeadRoute,
   ApiPublicSyncMessageRoute: ApiPublicSyncMessageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
