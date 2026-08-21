@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeviceId } from "../auth";
+import { getDeviceId, getDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +28,7 @@ export const Route = createFileRoute("/api/public/sync/message")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const user_id = await getDeviceOwner(device_id);
 
         let leadId = body.lead_id as string | undefined;
         if (!leadId && body.lead_name) {
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/api/public/sync/message")({
 
         const { error } = await supabaseAdmin.from("messages").insert({
           device_id,
-          user_id: null,
+          user_id,
           lead_id: leadId,
           direction,
           content: body.content,

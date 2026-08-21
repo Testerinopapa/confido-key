@@ -77,6 +77,54 @@ export type Database = {
         }
         Relationships: []
       }
+      extension_claim_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          redeemed_at: string | null
+          redeemed_device_id: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_device_id?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_device_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      extension_devices: {
+        Row: {
+          claimed_at: string
+          device_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          device_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          device_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fingerprints: {
         Row: {
           created_at: string
@@ -228,6 +276,7 @@ export type Database = {
           p_messages_received: number
           p_messages_sent: number
           p_posts_created: number
+          p_user_id: string | null
         }
         Returns: {
           comments_made: number
@@ -240,6 +289,13 @@ export type Database = {
           posts_created: number
           user_id: string | null
         }
+      }
+      claim_extension_device: {
+        Args: {
+          p_code_hash: string
+          p_device_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

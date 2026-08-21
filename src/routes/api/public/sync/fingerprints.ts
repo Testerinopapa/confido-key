@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeviceId } from "../auth";
+import { getDeviceId, getDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const user_id = await getDeviceOwner(device_id);
         const { data } = await supabaseAdmin
           .from("fingerprints")
           .select("fingerprint, kind")
@@ -64,7 +65,7 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
         if (!existing) {
           const result = await supabaseAdmin.from("fingerprints").insert({
             device_id,
-            user_id: null,
+            user_id,
             fingerprint: body.fingerprint,
             kind: body.kind,
           });
