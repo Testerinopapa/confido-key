@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeviceId, getDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -26,7 +26,16 @@ export const Route = createFileRoute("/api/public/sync/activity")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const date = body.date || new Date().toISOString().slice(0, 10);
-        const user_id = await getDeviceOwner(device_id);
+        let user_id: string;
+        try {
+          user_id = await requireDeviceOwner(device_id);
+        } catch (error) {
+          if (error instanceof DeviceNotClaimedError) {
+            return Response.json({ error: error.message }, { status: 401, headers: CORS_HEADERS });
+          }
+          console.error("[sync/activity] device ownership lookup error", error);
+          return Response.json({ error: "Unable to verify extension device" }, { status: 503, headers: CORS_HEADERS });
+        }
         const { error } = await supabaseAdmin.rpc("increment_daily_activity", {
           p_device_id: device_id,
           p_date: date,
