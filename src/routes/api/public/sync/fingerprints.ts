@@ -94,9 +94,10 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
 
         let error = null;
         if (!existing) {
+          const owner = await getDeviceOwner(device_id);
           const result = await supabaseAdmin.from("fingerprints").insert({
             device_id,
-            user_id,
+            user_id: owner,
             fingerprint: body.fingerprint,
             kind: body.kind,
             ...(occurredAt ? { created_at: occurredAt } : {}),

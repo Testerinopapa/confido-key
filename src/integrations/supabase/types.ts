@@ -267,16 +267,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_extension_device: {
+        Args: { p_code_hash: string; p_device_id: string }
+        Returns: string
+      }
       increment_daily_activity: {
         Args: {
-          p_comments_made: number
-          p_connections_sent: number
+          p_comments_made?: number
+          p_connections_sent?: number
           p_date: string
           p_device_id: string
-          p_messages_received: number
-          p_messages_sent: number
-          p_posts_created: number
-          p_user_id: string | null
+          p_messages_received?: number
+          p_messages_sent?: number
+          p_posts_created?: number
+          p_user_id?: string
         }
         Returns: {
           comments_made: number
@@ -289,13 +293,12 @@ export type Database = {
           posts_created: number
           user_id: string | null
         }
-      }
-      claim_extension_device: {
-        Args: {
-          p_code_hash: string
-          p_device_id: string
+        SetofOptions: {
+          from: "*"
+          to: "daily_activity"
+          isOneToOne: true
+          isSetofReturn: false
         }
-        Returns: string
       }
     }
     Enums: {
