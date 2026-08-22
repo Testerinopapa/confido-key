@@ -106,8 +106,14 @@ function sumRows(rows: ActivityRow[]) {
   );
 }
 
+function parseDateValue(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ? new Date(`${date}T00:00:00`)
+    : new Date(date);
+}
+
 function formatDateLabel(date: string) {
-  return new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
+  return parseDateValue(date).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
@@ -373,7 +379,7 @@ function RecentActivity({ rows, messages }: { rows: ActivityRow[]; messages: Mes
         })),
       ),
   ]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => parseDateValue(b.date).getTime() - parseDateValue(a.date).getTime())
     .slice(0, 5);
   return (
     <article className="analytics-card recent-activity">
@@ -390,7 +396,7 @@ function RecentActivity({ rows, messages }: { rows: ActivityRow[]; messages: Mes
               <em>{item.subtitle}</em>
             </span>
             <time>
-              {new Date(item.date).toLocaleDateString(undefined, {
+              {parseDateValue(item.date).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
               })}

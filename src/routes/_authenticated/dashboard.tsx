@@ -15,6 +15,12 @@ function StatCard({ icon, label, value, change }: { icon: ReactNode; label: stri
   );
 }
 
+function localDateKey(date = new Date()) {
+  return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+    .map((value, index) => index === 0 ? String(value) : String(value).padStart(2, "0"))
+    .join("-");
+}
+
 function Dashboard() {
   const { data: activity, isLoading } = useQuery({
     queryKey: ["dashboard"],
@@ -35,7 +41,7 @@ function Dashboard() {
 
   if (isLoading) return <AppChrome><div className="p-8 text-slate-500">Loading...</div></AppChrome>;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const todayRow = activity?.find(r => r.date === today);
   const totals = (activity ?? []).reduce((acc, r) => ({
     connections_sent: acc.connections_sent + r.connections_sent,

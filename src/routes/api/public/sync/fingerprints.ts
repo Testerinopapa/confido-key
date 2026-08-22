@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, getSyncTimestamp, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +64,8 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
           return Response.json({ error: 'kind must be "comment" or "post"' }, { status: 400, headers: CORS_HEADERS });
         }
 
+        const occurredAt = getSyncTimestamp(body.occurred_at);
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         let user_id: string;
@@ -98,6 +100,7 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
             user_id: owner,
             fingerprint: body.fingerprint,
             kind: body.kind,
+            ...(occurredAt ? { created_at: occurredAt } : {}),
           });
           error = result.error;
         }
