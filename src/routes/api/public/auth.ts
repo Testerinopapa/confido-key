@@ -2,6 +2,11 @@ export function getDeviceId(request: Request): string | null {
   return request.headers.get("X-Device-Id");
 }
 
+export function isPremiumPlan(plan: string | null | undefined): boolean {
+  const normalized = (plan ?? "").trim().toLowerCase();
+  return normalized.includes("pro") || normalized.includes("premium");
+}
+
 export class DeviceNotClaimedError extends Error {}
 
 export function getSyncTimestamp(value: unknown): string | null {
@@ -32,6 +37,20 @@ export async function requireDeviceOwner(deviceId: string): Promise<string> {
   const userId = await getDeviceOwner(deviceId);
   if (!userId) throw new DeviceNotClaimedError("Extension device is not linked to an account");
   return userId;
+}
+
+export async function getDevicePlan(deviceId: string): Promise<string> {
+  const userId = await getDeviceOwner(deviceId);
+  if (!userId) return "Free";
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("plan")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data?.plan ?? "Free";
 }
 
 export async function getAuthenticatedUserId(request: Request): Promise<string | null> {

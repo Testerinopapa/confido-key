@@ -23,6 +23,7 @@ import { Route as ApiPublicClaudeRouteImport } from './routes/api/public/claude'
 import { Route as ApiPublicGeminiRouteImport } from './routes/api/public/gemini'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicClaimRouteImport } from './routes/api/public/claim'
+import { Route as ApiPublicEntitlementRouteImport } from './routes/api/public/entitlement'
 import { Route as ApiPublicSyncActivityRouteImport } from './routes/api/public/sync/activity'
 import { Route as ApiPublicSyncFingerprintsRouteImport } from './routes/api/public/sync/fingerprints'
 import { Route as ApiPublicSyncLeadRouteImport } from './routes/api/public/sync/lead'
@@ -97,6 +98,11 @@ const ApiPublicClaimRoute = ApiPublicClaimRouteImport.update({
   path: '/api/public/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEntitlementRoute = ApiPublicEntitlementRouteImport.update({
+  id: '/api/public/entitlement',
+  path: '/api/public/entitlement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSyncActivityRoute = ApiPublicSyncActivityRouteImport.update({
   id: '/api/public/sync/activity',
   path: '/api/public/sync/activity',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/claim': typeof ApiPublicClaimRoute
+  '/api/public/entitlement': typeof ApiPublicEntitlementRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/claim': typeof ApiPublicClaimRoute
+  '/api/public/entitlement': typeof ApiPublicEntitlementRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/api/public/gemini': typeof ApiPublicGeminiRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/claim': typeof ApiPublicClaimRoute
+  '/api/public/entitlement': typeof ApiPublicEntitlementRoute
   '/api/public/sync/activity': typeof ApiPublicSyncActivityRoute
   '/api/public/sync/fingerprints': typeof ApiPublicSyncFingerprintsRoute
   '/api/public/sync/lead': typeof ApiPublicSyncLeadRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/claim'
+    | '/api/public/entitlement'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/claim'
+    | '/api/public/entitlement'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/api/public/gemini'
     | '/api/public/health'
     | '/api/public/claim'
+    | '/api/public/entitlement'
     | '/api/public/sync/activity'
     | '/api/public/sync/fingerprints'
     | '/api/public/sync/lead'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   ApiPublicGeminiRoute: typeof ApiPublicGeminiRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicClaimRoute: typeof ApiPublicClaimRoute
+  ApiPublicEntitlementRoute: typeof ApiPublicEntitlementRoute
   ApiPublicSyncActivityRoute: typeof ApiPublicSyncActivityRoute
   ApiPublicSyncFingerprintsRoute: typeof ApiPublicSyncFingerprintsRoute
   ApiPublicSyncLeadRoute: typeof ApiPublicSyncLeadRoute
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/entitlement': {
+      id: '/api/public/entitlement'
+      path: '/api/public/entitlement'
+      fullPath: '/api/public/entitlement'
+      preLoaderRoute: typeof ApiPublicEntitlementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sync/activity': {
       id: '/api/public/sync/activity'
       path: '/api/public/sync/activity'
@@ -415,6 +435,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGeminiRoute: ApiPublicGeminiRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicClaimRoute: ApiPublicClaimRoute,
+  ApiPublicEntitlementRoute: ApiPublicEntitlementRoute,
   ApiPublicSyncActivityRoute: ApiPublicSyncActivityRoute,
   ApiPublicSyncFingerprintsRoute: ApiPublicSyncFingerprintsRoute,
   ApiPublicSyncLeadRoute: ApiPublicSyncLeadRoute,

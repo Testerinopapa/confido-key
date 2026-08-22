@@ -19,15 +19,13 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
-  Terminal,
-  Upload,
   Zap,
 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { getExtensionDownloadUrl } from "@/lib/extension-download.functions";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -223,13 +221,6 @@ export function LandingPage() {
       <section className="panel hero-panel mx-auto max-w-7xl overflow-hidden p-10">
         <header className="flex items-center justify-between border-b border-slate-100 pb-5">
           <Logo />
-          <nav className="hidden gap-12 text-sm font-semibold text-slate-700 lg:flex">
-            <span>Product</span>
-            <span>Features</span>
-            <span>Pricing</span>
-            <span>Resources</span>
-            <span>Changelog</span>
-          </nav>
           <div className="flex gap-3">
             {loading ? null : user ? (
               <Link to="/dashboard">
@@ -321,10 +312,6 @@ export function LandingPage() {
               "Daily Scheduling",
               "Schedule each mode to run automatically at a set hour — midnight reset keeps counts clean.",
             ],
-            [
-              "Secure API Proxy",
-              "Claude and Gemini keys stay server-side and are never exposed to the browser.",
-            ],
           ].map(([title, desc]) => (
             <div className="feature" key={title}>
               <span className="icon">
@@ -335,89 +322,18 @@ export function LandingPage() {
             </div>
           ))}
         </div>
-
-        
-
-
-
-        <section className="mx-auto mt-20 max-w-3xl space-y-6">
-          <h2 className="text-sm font-semibold tracking-wider text-slate-500 uppercase">
-            API Endpoints
-          </h2>
-          {[
-            {
-              method: "POST",
-              path: "/api/public/claude",
-              provider: "Anthropic Messages API",
-              note: "Body forwarded verbatim to /v1/messages. SSE streaming passes through.",
-              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/claude", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 200,
-    messages: [{ role: "user", content: "Draft a LinkedIn reply" }],
-  }),
-});`,
-            },
-            {
-              method: "POST",
-              path: "/api/public/gemini",
-              provider: "Google Generative Language API",
-              note: "Pass model, action, and payload. Supports generateContent, streamGenerateContent, countTokens, embedContent.",
-              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/gemini", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "gemini-3.1-flash-image-preview",
-    action: "generateContent",
-    generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
-    contents: [{ parts: [{ text: "Professional LinkedIn post image" }] }],
-  }),
-});`,
-            },
-            {
-              method: "GET",
-              path: "/api/public/health",
-              provider: "Status check",
-              note: "Returns configured providers and version.",
-              sample: `fetch("https://YOUR-INSTANCE.lovable.app/api/public/health")
-  .then(r => r.json())
-  .then(console.log);
-// { status: "ok", version: "1.0.0", providers: { claude: true, gemini: true } }`,
-            },
-          ].map((ep) => (
-            <article
-              key={ep.path}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white"
-              style={{ boxShadow: "var(--shadow-panel)" }}
-            >
-              <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
-                <span className="rounded-md bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700">
-                  {ep.method}
-                </span>
-                <code className="text-sm font-semibold text-slate-800">{ep.path}</code>
-                <span className="text-xs text-slate-400">{ep.provider}</span>
-              </div>
-              <p className="px-5 pt-4 text-sm text-slate-500">{ep.note}</p>
-              <pre className="mt-4 overflow-x-auto border-t border-slate-100 bg-slate-50 px-5 py-4 text-xs leading-relaxed text-slate-700">
-                <code>{ep.sample}</code>
-              </pre>
-            </article>
-          ))}
-        </section>
-
-        <section className="mx-auto mt-16 max-w-3xl rounded-xl border border-blue-200 bg-blue-50 p-5">
-          <h2 className="text-sm font-semibold text-blue-800">Server-side AI keys</h2>
-          <p className="mt-2 text-sm leading-relaxed text-blue-700">
-            The extension sends requests through this app using its device ID. Claude and Gemini
-            provider keys remain on the server and are never entered into the extension.
-          </p>
-        </section>
       </section>
     </main>
   );
 }
+
+type UsageTotals = {
+  connections_sent: number;
+  comments_made: number;
+  posts_created: number;
+  messages_sent: number;
+  messages_received: number;
+};
 
 export function AppChrome({
   children,
@@ -426,30 +342,48 @@ export function AppChrome({
 }: {
   children: ReactNode;
   active?: string;
-  usageTotals?: {
-    connections_sent: number;
-    comments_made: number;
-    posts_created: number;
-    messages_sent: number;
-    messages_received: number;
-  };
+  usageTotals?: UsageTotals;
 }) {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { data: sidebarActivity = [] } = useQuery({
+    queryKey: ["app-chrome-usage", user?.id],
+    enabled: Boolean(user),
+    queryFn: async (): Promise<UsageTotals[]> => {
+      const { data, error } = await supabase
+        .from("daily_activity")
+        .select("connections_sent, comments_made, posts_created, messages_sent, messages_received")
+        .order("date", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data ?? [];
+    },
+    refetchInterval: 15_000,
+  });
   const name = profile?.display_name ?? user?.email ?? "Account";
   const avatar =
     profile?.avatar_url ??
     `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
   const planName = profile?.plan ?? "Free";
   const planAllowance = planName.toLowerCase().includes("pro") ? 25000 : 5000;
-  const usedActions = usageTotals
-    ? usageTotals.connections_sent +
-      usageTotals.comments_made +
-      usageTotals.posts_created +
-      usageTotals.messages_sent +
-      usageTotals.messages_received
-    : 0;
+  const sidebarTotals = sidebarActivity.reduce<UsageTotals>(
+    (totals, row) => ({
+      connections_sent: totals.connections_sent + row.connections_sent,
+      comments_made: totals.comments_made + row.comments_made,
+      posts_created: totals.posts_created + row.posts_created,
+      messages_sent: totals.messages_sent + row.messages_sent,
+      messages_received: totals.messages_received + row.messages_received,
+    }),
+    { connections_sent: 0, comments_made: 0, posts_created: 0, messages_sent: 0, messages_received: 0 },
+  );
+  const currentUsage = usageTotals ?? sidebarTotals;
+  const usedActions =
+    currentUsage.connections_sent +
+    currentUsage.comments_made +
+    currentUsage.posts_created +
+    currentUsage.messages_sent +
+    currentUsage.messages_received;
   const usagePercent = Math.min(100, Math.round((usedActions / planAllowance) * 100));
   const unreadAlerts = 0;
 

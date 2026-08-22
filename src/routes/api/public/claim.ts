@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hashExtensionClaimCode } from "@/lib/extension-claim";
-import { getDeviceId } from "./auth";
+import { getDeviceId, isPremiumPlan } from "./auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -39,7 +39,14 @@ export const Route = createFileRoute("/api/public/claim")({
           return Response.json({ error: "Invalid or expired extension code" }, { status: 400, headers: CORS_HEADERS });
         }
 
-        return Response.json({ ok: true, userId }, { headers: CORS_HEADERS });
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("plan")
+          .eq("id", userId)
+          .maybeSingle();
+        const plan = profile?.plan ?? "Free";
+
+        return Response.json({ ok: true, userId, plan, premium: isPremiumPlan(plan) }, { headers: CORS_HEADERS });
       },
     },
   },
