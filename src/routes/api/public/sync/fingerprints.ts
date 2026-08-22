@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeviceId, getDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -20,11 +20,24 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const user_id = await getDeviceOwner(device_id);
-        const { data } = await supabaseAdmin
+        try {
+          await requireDeviceOwner(device_id);
+        } catch (error) {
+          if (error instanceof DeviceNotClaimedError) {
+            return Response.json({ error: error.message }, { status: 401, headers: CORS_HEADERS });
+          }
+          console.error("[sync/fingerprints] device ownership lookup error", error);
+          return Response.json({ error: "Unable to verify extension device" }, { status: 503, headers: CORS_HEADERS });
+        }
+        const { data, error } = await supabaseAdmin
           .from("fingerprints")
           .select("fingerprint, kind")
           .eq("device_id", device_id);
+
+        if (error) {
+          console.error("[sync/fingerprints] read error", error);
+          return Response.json({ error: "Failed to load fingerprints" }, { status: 500, headers: CORS_HEADERS });
+        }
 
         const comments = (data ?? []).filter(f => f.kind === "comment").map(f => f.fingerprint);
         const posts = (data ?? []).filter(f => f.kind === "post").map(f => f.fingerprint);
@@ -53,13 +66,29 @@ export const Route = createFileRoute("/api/public/sync/fingerprints")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { data: existing } = await supabaseAdmin
+        let user_id: string;
+        try {
+          user_id = await requireDeviceOwner(device_id);
+        } catch (error) {
+          if (error instanceof DeviceNotClaimedError) {
+            return Response.json({ error: error.message }, { status: 401, headers: CORS_HEADERS });
+          }
+          console.error("[sync/fingerprints] device ownership lookup error", error);
+          return Response.json({ error: "Unable to verify extension device" }, { status: 503, headers: CORS_HEADERS });
+        }
+
+        const { data: existing, error: lookupError } = await supabaseAdmin
           .from("fingerprints")
           .select("id")
           .eq("device_id", device_id)
           .eq("fingerprint", body.fingerprint)
           .eq("kind", body.kind)
           .maybeSingle();
+
+        if (lookupError) {
+          console.error("[sync/fingerprints] lookup error", lookupError);
+          return Response.json({ error: "Failed to look up fingerprint" }, { status: 500, headers: CORS_HEADERS });
+        }
 
         let error = null;
         if (!existing) {

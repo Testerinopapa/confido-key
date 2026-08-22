@@ -2,14 +2,23 @@ export function getDeviceId(request: Request): string | null {
   return request.headers.get("X-Device-Id");
 }
 
+export class DeviceNotClaimedError extends Error {}
+
 export async function getDeviceOwner(deviceId: string): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("extension_devices")
     .select("user_id")
     .eq("device_id", deviceId)
     .maybeSingle();
+  if (error) throw new Error(error.message);
   return data?.user_id ?? null;
+}
+
+export async function requireDeviceOwner(deviceId: string): Promise<string> {
+  const userId = await getDeviceOwner(deviceId);
+  if (!userId) throw new DeviceNotClaimedError("Extension device is not linked to an account");
+  return userId;
 }
 
 export async function getAuthenticatedUserId(request: Request): Promise<string | null> {

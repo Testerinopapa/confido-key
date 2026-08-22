@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeviceId, getDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -36,7 +36,16 @@ export const Route = createFileRoute("/api/public/sync/lead")({
         const status = VALID_STATUSES.has(body.status) ? body.status : "new";
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const user_id = await getDeviceOwner(device_id);
+        let user_id: string;
+        try {
+          user_id = await requireDeviceOwner(device_id);
+        } catch (error) {
+          if (error instanceof DeviceNotClaimedError) {
+            return Response.json({ error: error.message }, { status: 401, headers: CORS_HEADERS });
+          }
+          console.error("[sync/lead] device ownership lookup error", error);
+          return Response.json({ error: "Unable to verify extension device" }, { status: 503, headers: CORS_HEADERS });
+        }
 
         let query = supabaseAdmin
           .from("leads")
@@ -44,7 +53,11 @@ export const Route = createFileRoute("/api/public/sync/lead")({
           .eq("device_id", device_id)
           .eq("name", body.name);
 
-        const { data: existing } = await query.maybeSingle();
+        const { data: existing, error: existingError } = await query.maybeSingle();
+        if (existingError) {
+          console.error("[sync/lead] lookup error", existingError);
+          return Response.json({ error: "Failed to look up lead" }, { status: 500, headers: CORS_HEADERS });
+        }
 
         const nextStatus = existing
           ? statusRank(status) >= statusRank(existing.status) ? status : existing.status
