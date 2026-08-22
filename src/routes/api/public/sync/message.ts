@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, getSyncTimestamp, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -54,15 +54,18 @@ export const Route = createFileRoute("/api/public/sync/message")({
         }
 
         const direction = body.direction === "inbound" ? "inbound" : "outbound";
+        const occurredAt = getSyncTimestamp(body.occurred_at);
 
-        const { error } = await supabaseAdmin.from("messages").insert({
+        const message = {
           device_id,
           user_id,
           lead_id: leadId,
           direction,
           content: body.content,
           ai_generated: body.ai_generated ?? false,
-        });
+          ...(occurredAt ? { created_at: occurredAt } : {}),
+        };
+        const { error } = await supabaseAdmin.from("messages").insert(message);
 
         if (error) {
           console.error("[sync/message] insert error", error);

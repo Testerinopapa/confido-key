@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, getSyncTimestamp, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -34,6 +34,7 @@ export const Route = createFileRoute("/api/public/sync/lead")({
         if (!body.name) return Response.json({ error: "name is required" }, { status: 400, headers: CORS_HEADERS });
 
         const status = VALID_STATUSES.has(body.status) ? body.status : "new";
+        const occurredAt = getSyncTimestamp(body.occurred_at);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         let user_id: string;
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/api/public/sync/lead")({
 
         let query = supabaseAdmin
           .from("leads")
-          .select("id, status, headline, profile_url")
+          .select("id, status, headline, profile_url, updated_at")
           .eq("device_id", device_id)
           .eq("name", body.name);
 
@@ -63,6 +64,10 @@ export const Route = createFileRoute("/api/public/sync/lead")({
           ? statusRank(status) >= statusRank(existing.status) ? status : existing.status
           : status;
 
+        const now = new Date().toISOString();
+        const updatedAt = existing?.updated_at && occurredAt && existing.updated_at > occurredAt
+          ? existing.updated_at
+          : occurredAt ?? now;
         const row = {
           device_id,
           user_id,
@@ -70,7 +75,8 @@ export const Route = createFileRoute("/api/public/sync/lead")({
           headline: body.headline || existing?.headline || null,
           profile_url: body.profile_url || existing?.profile_url || null,
           status: nextStatus,
-          updated_at: new Date().toISOString(),
+          ...(existing ? {} : { created_at: occurredAt ?? now }),
+          updated_at: updatedAt,
         };
 
         let leadId: string;

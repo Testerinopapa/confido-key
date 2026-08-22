@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DeviceNotClaimedError, getDeviceId, requireDeviceOwner } from "../auth";
+import { DeviceNotClaimedError, getDeviceId, getSyncDate, requireDeviceOwner } from "../auth";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/sync/activity")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const date = body.date || new Date().toISOString().slice(0, 10);
+        const date = getSyncDate(body.occurred_date) ?? getSyncDate(body.date) ?? new Date().toISOString().slice(0, 10);
         let user_id: string;
         try {
           user_id = await requireDeviceOwner(device_id);
